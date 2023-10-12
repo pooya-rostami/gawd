@@ -209,29 +209,3 @@ def diff_workflows(w1, w2):
             changes.extend(find_changes(key, None, key, w2[key]))
 
     return changes
-
-
-def example():
-    d1 = {
-        "name": "tests",
-        "steps": [
-            {"uses": "actions/checkout@v2"},
-            {"name": "Test code", "run": "pytest --all"},
-            {"uses": "actions/clean@v1"},
-        ],
-    }
-    d2 = {
-        "name": "test",
-        "steps": [
-            {"uses": "actions/checkout@v3", "with": {'x': 1}},
-            {"name": "Install dependencies", "run": "pip install pytest"},
-            {"name": "Test", "run": "pytest"},
-            {"uses": "actions/clean@v1"},
-        ],
-    }
-
-    print("\n".join(map(str, find_changes("d1", d1, "d2", d2))))
-
-
-if __name__ == "__main__":
-    example()
