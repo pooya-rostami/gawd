@@ -24,4 +24,4 @@ jobs:
           pip install pip -U
           pip install pytest
       - name: Execute tests
-        run: pytest
+        run: ./pytest
