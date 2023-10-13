@@ -250,7 +250,7 @@ def cli():
     JOB_NAME_WEIGHT = args.names
 
     for diff in diff_workflow_files(args.old, args.new):
-        print('\t'.join(map(str, diff))
+        print('\t'.join(map(str, diff)))
 
     
 if __name__ == '__main__':
