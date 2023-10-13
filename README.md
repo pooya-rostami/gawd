@@ -1,6 +1,6 @@
 # GAWD - GitHub Actions Workflow Differ
 
-[![Tests](https://github.com/pooya-rostami/GAWD/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.compooya-rostami/GAWD/actions/workflows/test.yaml)
+[![Tests](https://github.com/pooya-rostami/GAWD/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/pooya-rostami/GAWD/actions/workflows/test.yaml)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![PyPI](https://badgen.net/pypi/v/gawd)](https://pypi.org/project/gawd)
 [![Commits](https://badgen.net/github/last-commit/pooya-rostami/GAWD)](https://github.com/pooya-rostami/GAWD/commits/)
