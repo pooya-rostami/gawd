@@ -1,6 +1,6 @@
 import pytest
 
-import diff_tool
+import gawd
 
 
 class TestTextDiffTool:

@@ -2,6 +2,9 @@ import difflib
 import itertools
 
 
+__all__ = ['diff_workflows', 'diff_workflow_files']
+
+
 # Threshold below which two items are considered mapped
 THRESHOLD = 0.5
 # Weight of the relative positions between two items
@@ -209,3 +212,17 @@ def diff_workflows(w1, w2):
             changes.extend(find_changes(key, None, key, w2[key]))
 
     return changes
+
+
+def diff_workflow_files(w1, w2):
+    raise NotImplementedError()
+
+
+def cli():
+    raise NotImplementedError()
+
+
+if __name__ == '__main__':
+    import sys
+    
+    sys.exit(cli())
