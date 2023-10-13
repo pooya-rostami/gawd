@@ -164,8 +164,15 @@ def diff_workflows(w1, w2):
 
     # Keys from left
     for key in w1.keys():
-        if key != "jobs":
+        if key not in ["on", "jobs"]:
             changes.extend(find_changes(key, w1[key], key, w2.get(key, None)))
+
+    # Specific handling of "on" when it's a list and not a dict
+    w1_on = w1.get("on", dict())
+    w2_on = w2.get("on", dict())    
+    w1_on = {key: None for key in w1_on} if isinstance(w1_on, list) else w1_on
+    w2_on = {key: None for key in w2_on} if instance(w2_on, list) else w2_on
+    changes.extend(find_changes('on', w1_on, 'on', w2_on))
 
     # Specific handling of jobs
     jobs1 = list(w1.get("jobs", {}).items())
@@ -210,7 +217,7 @@ def diff_workflows(w1, w2):
 
     # Keys from right
     for key in w2.keys():
-        if key not in w1 and key != "jobs":
+        if key not in w1 and key not in ["on", "jobs"]:
             changes.extend(find_changes(key, None, key, w2[key]))
 
     return changes
