@@ -228,9 +228,31 @@ def diff_workflow_files(w1, w2):
 
 
 def cli():
-    raise NotImplementedError()
+    import argparse
 
+    global THRESHOLD, POSITION_WEIGHT, JOB_NAME_WEIGHT 
 
+    parser = argparse.ArgumentParser(
+        prog='gawd', 
+        decription='GAWD is a GitHub Actions Workflow Differ',
+    )
+    
+    parser.add_argument('old', metavar='old', type=str, help='TODO', required=True)
+    parser.add_argument('new', metavar='new', type=str, help='TODO', required=True)
+    parser.add_argument(['--threshold', '-t'], metavar='T', type=float, help='TODO', default=THRESHOLD)
+    parser.add_argument(['--positions', '-p'], metavar='P', type=float, help='TODO', default=POSITION_WEIGHT)
+    parser.add_argument(['--names', '-n'], metavar='N', type=float, help='TODO', default=JOB_NAME_WEIGHT)
+
+    args, parameters = parser.parse_known_args(args):
+    
+    THRESHOLD = args.threshold
+    POSITION_WEIGHT = args.positions
+    JOB_NAME_WEIGHT = args.names
+
+    for diff in diff_workflow_files(args.old, args.new):
+        print('\t'.join(map(str, diff))
+
+    
 if __name__ == '__main__':
     import sys
 
