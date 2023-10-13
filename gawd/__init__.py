@@ -215,7 +215,14 @@ def diff_workflows(w1, w2):
 
 
 def diff_workflow_files(w1, w2):
-    raise NotImplementedError()
+    import ruamel.yaml as yaml
+    
+    with open(w1) as f1: 
+        with open(w2) as f2: 
+            parser = yaml.YAML()
+            w1 = parser.load(f1)
+            w2 = parser.load(f2)
+    return diff_workflows(w1, w2)
 
 
 def cli():
@@ -224,5 +231,5 @@ def cli():
 
 if __name__ == '__main__':
     import sys
-    
+
     sys.exit(cli())
