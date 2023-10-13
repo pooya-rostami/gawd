@@ -243,7 +243,7 @@ def cli():
     parser.add_argument(['--positions', '-p'], metavar='P', type=float, help='TODO', default=POSITION_WEIGHT)
     parser.add_argument(['--names', '-n'], metavar='N', type=float, help='TODO', default=JOB_NAME_WEIGHT)
 
-    args, parameters = parser.parse_known_args(args):
+    args, parameters = parser.parse_known_args(args)
     
     THRESHOLD = args.threshold
     POSITION_WEIGHT = args.positions
