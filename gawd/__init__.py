@@ -78,7 +78,9 @@ def distance(v1, v2):
         return dict_distance(v1, v2)
     elif isinstance(v1, list) and isinstance(v2, list):
         matches = find_matches(v1, v2)
-        return sum(score for _, _, score in matches) / len(matches)
+        score = sum(score for _, _, score in matches)
+        extra += max(len(v1), len(v2)) - len(matches)
+        return (score + extra) / (len(matches) + extra)
     elif type(v1) == type(v2):
         if isinstance(v1, str):
             return 1 - difflib.SequenceMatcher(None, v1, v2).ratio()
