@@ -79,7 +79,7 @@ def distance(v1, v2):
     elif isinstance(v1, list) and isinstance(v2, list):
         matches = find_matches(v1, v2)
         score = sum(score for _, _, score in matches)
-        extra += max(len(v1), len(v2)) - len(matches)
+        extra = max(len(v1), len(v2)) - len(matches)
         return (score + extra) / (len(matches) + extra)
     elif type(v1) == type(v2):
         if isinstance(v1, str):
