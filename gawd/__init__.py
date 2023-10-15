@@ -160,17 +160,39 @@ def find_changes(lpath, v1, rpath, v2):
 def diff_workflows(w1, w2):
     changes = []
 
-    # Keys from left
-    for key in w1.keys():
-        if key not in ["on", "jobs"]:
-            changes.extend(find_changes(key, w1[key], key, w2.get(key, None)))
+    # Compare workflows except their "on" and "jobs" keys (specific treatment for them)
+    changes.extend(
+        find_changes(
+            "", 
+            [{k: v} for k, v in w1.items() if k not in ["on", "jobs"]], 
+            "", 
+            [{k: v} for k, v in w2.items() if k not in ["on", "jobs"]], 
+        )
+    )
 
-    # Specific handling of "on" when it's a list and not a dict
-    w1_on = w1.get("on", dict())
-    w2_on = w2.get("on", dict())
-    w1_on = {key: None for key in w1_on} if isinstance(w1_on, list) else w1_on
-    w2_on = {key: None for key in w2_on} if isinstance(w2_on, list) else w2_on
-    changes.extend(find_changes("on", w1_on, "on", w2_on))
+    # Specific handling of "on" when it's a list or str and not a dict
+    if 'on' in w1: 
+        if 'on' not in w2: 
+            changes.append(('removed', 'on', w1['on'], None, None))
+        else:
+            w1_on = w1['on']
+            w2_on = w2['on']
+
+            # Convert w1['on'] to dict
+            if not isinstance(w1_on, dict):
+                if not isinstance(w1_on, list):
+                    w1_on = [w1_on]
+                w1_on = {k: None for k in w1_on}
+
+            # Convert w2['on'] to dict
+            if not isinstance(w2_on, dict):
+                if not isinstance(w2_on, list):
+                    w2_on = [w2_on]
+                w2_on = {k: None for k in w2_on}
+            
+            changes.extend(find_changes('on', w1_on, 'on', w2_on))
+    elif 'on' in w2:
+        changes.append(('added', None, None, 'on', w2['on']))
 
     # Specific handling of jobs
     jobs1 = list(w1.get("jobs", {}).items())
@@ -212,11 +234,6 @@ def diff_workflows(w1, w2):
     for name, job in jobs2:
         if name not in right_matched:
             changes.append(("added", None, None, "jobs." + name, job))
-
-    # Keys from right
-    for key in w2.keys():
-        if key not in w1 and key not in ["on", "jobs"]:
-            changes.extend(find_changes(key, None, key, w2[key]))
 
     return changes
 
