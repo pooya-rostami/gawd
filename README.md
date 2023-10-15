@@ -57,7 +57,7 @@ options:
 
 `gawd` comes with two functions to compare workflow files, namely `diff_workflow_files` and `diff_workflows`. 
 The former accepts the paths to two workflow files, load them and returns the output of `diff_workflows`. 
-The latter accepts two workflows as Python dictionaries (e.g., loaded with `ruamel.yaml`) and returns a list of 4-uples `(kind, old_path, old_value, new_path, new_value)`.
+The latter accepts two workflows as Python dictionaries (e.g., loaded with `ruamel.yaml`) and returns a list of 5-uples `(kind, old_path, old_value, new_path, new_value)`.
 
 The `kind` component is one of `added, removed, changed, moved, renamed` and indicates the kind of change. 
 `old_path` and `new_path` correspond to a dotted notation indicating where the change occurred, while `old_value` and `new_value` correspond to the previous and new values, respectively. 
