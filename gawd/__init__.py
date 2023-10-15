@@ -2,7 +2,7 @@ import difflib
 import itertools
 
 
-__all__ = ['diff_workflows', 'diff_workflow_files']
+__all__ = ["diff_workflows", "diff_workflow_files"]
 
 
 # Threshold below which two items are considered mapped
@@ -52,7 +52,7 @@ def dict_distance(s1, s2):
     """Compute a normalized distance between two dictionaries."""
     if s1 == s2:
         return 0
-    
+
     common = [k for k in s1 if k in s2]
     removed = [k for k in s1 if k not in s2]
     added = [k for k in s2 if k not in s1]
@@ -96,9 +96,9 @@ def dict_changes(lpath, v1, rpath, v2):
 
     changes = []
     for k in removed:
-        changes.append(("removed", "{}.{}".format(lpath, k), v1[k]))
+        changes.append(("removed", "{}.{}".format(lpath, k), v1[k], None, None))
     for k in added:
-        changes.append(("added", "{}.{}".format(rpath, k), v2[k]))
+        changes.append(("added", None, None, "{}.{}".format(rpath, k), v2[k]))
     for k in common:
         changes.extend(
             find_changes(
@@ -119,11 +119,11 @@ def list_changes(lpath, v1, rpath, v2):
     for (i, a), (j, b), score in matches:
         if score > THRESHOLD:
             break
-        n_lpath = "{}.[{}]".format(lpath, i)
-        n_rpath = "{}.[{}]".format(rpath, j)
+        n_lpath = "{}[{}]".format(lpath, i)
+        n_rpath = "{}[{}]".format(rpath, j)
         # Detect moves
         if i != j:
-            changes.append(("moved", n_lpath, n_rpath))
+            changes.append(("moved", n_lpath, a, n_rpath, b))
         # Detect other changes
         changes.extend(find_changes(n_lpath, a, n_rpath, b))
         left_matched.add(i)
@@ -132,13 +132,10 @@ def list_changes(lpath, v1, rpath, v2):
     # Deal with added and removed items
     for i, a in enumerate(v1):
         if i not in left_matched:
-            changes.append(("removed", "{}.[{}]".format(lpath, i), a))
+            changes.append(("removed", "{}[{}]".format(lpath, i), a, None, None))
     for j, b in enumerate(v2):
         if j not in right_matched:
-            changes.append(("added", "{}.[{}]".format(rpath, j), b))
-
-    # Sort changes by position, for clarity
-    changes = sorted(changes, key=lambda d: d[1])
+            changes.append(("added", None, None, "{}[{}]".format(rpath, j), b))
 
     return changes
 
@@ -146,10 +143,11 @@ def list_changes(lpath, v1, rpath, v2):
 def find_changes(lpath, v1, rpath, v2):
     if v1 == v2:
         return []
-    if v2 is None:
-        return [("removed", lpath, v1)]
-    if v1 is None:
-        return [("added", rpath, v2)]    
+
+    # if v2 is None:
+    #     return [("removed", lpath, v1)]
+    # if v1 is None:
+    #     return [("added", rpath, v2)]
 
     if isinstance(v1, dict) and isinstance(v2, dict):
         return dict_changes(lpath, v1, rpath, v2)
@@ -169,10 +167,10 @@ def diff_workflows(w1, w2):
 
     # Specific handling of "on" when it's a list and not a dict
     w1_on = w1.get("on", dict())
-    w2_on = w2.get("on", dict())    
+    w2_on = w2.get("on", dict())
     w1_on = {key: None for key in w1_on} if isinstance(w1_on, list) else w1_on
-    w2_on = {key: None for key in w2_on} if instance(w2_on, list) else w2_on
-    changes.extend(find_changes('on', w1_on, 'on', w2_on))
+    w2_on = {key: None for key in w2_on} if isinstance(w2_on, list) else w2_on
+    changes.extend(find_changes("on", w1_on, "on", w2_on))
 
     # Specific handling of jobs
     jobs1 = list(w1.get("jobs", {}).items())
@@ -201,7 +199,7 @@ def diff_workflows(w1, w2):
 
         # Did we rename a job?
         if left_name != right_name:
-            changes.append(("renamed", "jobs." + left_name, "jobs." + right_name))
+            changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
 
         changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
         left_matched.add(left_name)
@@ -210,10 +208,10 @@ def diff_workflows(w1, w2):
     # Handling of non-matched jobs
     for name, job in jobs1:
         if name not in left_matched:
-            changes.append(("removed", "jobs." + name, job))
+            changes.append(("removed", "jobs." + name, job, None, None))
     for name, job in jobs2:
         if name not in right_matched:
-            changes.append(("added", "jobs." + name, job))
+            changes.append(("added", None, None, "jobs." + name, job))
 
     # Keys from right
     for key in w2.keys():
@@ -225,10 +223,10 @@ def diff_workflows(w1, w2):
 
 def diff_workflow_files(w1, w2):
     import ruamel.yaml as yaml
-    
-    with open(w1) as f1: 
-        with open(w2) as f2: 
-            parser = yaml.YAML()
+
+    with open(w1) as f1:
+        with open(w2) as f2:
+            parser = yaml.YAML(pure=True)
             w1 = parser.load(f1)
             w2 = parser.load(f2)
     return diff_workflows(w1, w2)
@@ -237,30 +235,61 @@ def diff_workflow_files(w1, w2):
 def cli():
     import argparse
 
-    global THRESHOLD, POSITION_WEIGHT, JOB_NAME_WEIGHT 
+    global THRESHOLD, POSITION_WEIGHT, JOB_NAME_WEIGHT
 
     parser = argparse.ArgumentParser(
-        prog='gawd', 
-        decription='GAWD is a GitHub Actions Workflow Differ',
+        prog="gawd",
+        description="GAWD is a GitHub Actions Workflow Differ",
     )
-    
-    parser.add_argument('old', metavar='old', type=str, help='TODO', required=True)
-    parser.add_argument('new', metavar='new', type=str, help='TODO', required=True)
-    parser.add_argument(['--threshold', '-t'], metavar='T', type=float, help='TODO', default=THRESHOLD)
-    parser.add_argument(['--positions', '-p'], metavar='P', type=float, help='TODO', default=POSITION_WEIGHT)
-    parser.add_argument(['--names', '-n'], metavar='N', type=float, help='TODO', default=JOB_NAME_WEIGHT)
 
-    args, parameters = parser.parse_known_args(args)
-    
-    THRESHOLD = args.threshold
-    POSITION_WEIGHT = args.positions
-    JOB_NAME_WEIGHT = args.names
+    parser.add_argument("old", type=str, help="path to old workflow file")
+    parser.add_argument("new", type=str, help="path to new workflow file")
+    parser.add_argument(
+        "--threshold",
+        "-t",
+        dest="THRESHOLD",
+        metavar="X",
+        type=float,
+        help=f'distance threshold to map items, higher values favours "changed", lower values favours "added" and "removed" (default is {THRESHOLD})',
+        default=THRESHOLD,
+    )
+    parser.add_argument(
+        "--position-weight",
+        "-p",
+        dest="POSITION_WEIGHT",
+        metavar="X",
+        type=float,
+        help=f"weight of list positions when comparing sequences (default is {POSITION_WEIGHT})",
+        default=POSITION_WEIGHT,
+    )
+    parser.add_argument(
+        "--job-name-weight",
+        "-j",
+        dest="JOB_NAME_WEIGHT",
+        metavar="X",
+        type=float,
+        help=f"weight of job names when comparing jobs (default is {JOB_NAME_WEIGHT})",
+        default=JOB_NAME_WEIGHT,
+    )
 
-    for diff in diff_workflow_files(args.old, args.new):
-        print('\t'.join(map(str, diff)))
+    args, parameters = parser.parse_known_args()
 
-    
-if __name__ == '__main__':
-    import sys
+    THRESHOLD = args.THRESHOLD
+    POSITION_WEIGHT = args.POSITION_WEIGHT
+    JOB_NAME_WEIGHT = args.JOB_NAME_WEIGHT
 
-    sys.exit(cli())
+    for kind, o_path, o_value, n_path, n_value in diff_workflow_files(
+        args.old, args.new
+    ):
+        if kind == "added":
+            print(f"added {n_path} with {n_value!r}")
+        elif kind == "removed":
+            print(f"removed {o_path} with {o_value!r}")
+        elif kind == "changed":
+            print(f"changed {o_path} from {o_value!r} to {n_value!r}")
+        elif kind == "moved":
+            print(f"moved {o_path} to {n_path}")
+        elif kind == "renamed":
+            print(f"renamed {o_path} to {n_path}")
+        else:
+            raise ValueError(f"Unsupported change {kind}, please open an issue")

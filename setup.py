@@ -11,7 +11,7 @@ setup(
     name="gawd",
     version="0.1.0",
     license="LGPLv3",
-    author="Pooya Rostami Mazrae",
+    author="Pooya Rostami Mazrae, Alexandre Decan",
     url="https://github.com/pooya-rostami/gawd",
     description="GitHub Actions Workflow Differ",
     long_description=long_description,
@@ -19,7 +19,7 @@ setup(
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
-        # "Development Status :: 5 - Production/Stable",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "Intended Audience :: Education",
         "Intended Audience :: Information Technology",
@@ -41,8 +41,8 @@ setup(
         "test": ["pytest ~= 7.0"],
     },
     entry_points={
-        'console_scripts': [
-            'gawd=gawd:cli',
+        "console_scripts": [
+            "gawd=gawd:cli",
         ],
     },
     zip_safe=True,
