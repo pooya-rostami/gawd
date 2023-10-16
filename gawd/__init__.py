@@ -6,9 +6,9 @@ __all__ = ["diff_workflows", "diff_workflow_files"]
 
 
 # Threshold below which two items are considered mapped
-THRESHOLD = 0.4
+THRESHOLD = 0.5
 # Weight of the relative positions between two items
-POSITION_WEIGHT = 0.1
+POSITION_WEIGHT = 0.2
 # Weight of the difference between job names
 JOB_NAME_WEIGHT = 0.1
 
