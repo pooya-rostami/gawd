@@ -158,6 +158,16 @@ def find_changes(lpath, v1, rpath, v2):
 
 
 def diff_workflows(w1, w2):
+    """
+    Returns the list of differences between two workflow files
+
+         Parameters:
+                w1 : old version of workflow yaml file
+                w2 : new version of workflow yaml file
+
+        Returns:
+                changes (str): list of the diff between w1 and w2 yaml files
+    """
     changes = []
 
     # Compare workflows except their "on" and "jobs" keys (specific treatment for them)
@@ -240,14 +250,14 @@ def diff_workflows(w1, w2):
 
 def diff_workflow_files(w1, w2):
     """
-    Returns the diff of two workflow files in text format
+    Returns the diff of two workflow files in list format
 
          Parameters:
                 w1 (str): path to old version of workflow file
                 w2 (str): path to new version of workflow file
 
         Returns:
-                diff_workflows(w1, w2) (str): string of the diff of w1 and w2
+                diff_workflows(w1, w2) (str): list of the diff of w1 and w2
     """
     import ruamel.yaml as yaml
 
