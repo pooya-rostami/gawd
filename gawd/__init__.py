@@ -141,6 +141,18 @@ def list_changes(lpath, v1, rpath, v2):
 
 
 def find_changes(lpath, v1, rpath, v2):
+    """
+    Finding the changes between two components
+
+         Parameters:
+                lpath: path to reach the component v1 (component in old workflow file)
+                v1 : old version of compoenent
+                rpath: path to reach the component v2 (component in new workflow file)
+                v2 : new version of component
+
+        Returns:
+                return the changes in the component based on the type of them
+    """
     if v1 == v2:
         return []
 
