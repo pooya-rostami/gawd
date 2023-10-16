@@ -50,8 +50,16 @@ options:
   --job-name-weight X, -j X   weight of job names when comparing jobs (default is 0.1)
 ```
 
-**TODO**: Add an example
-
+<!-- **TODO**: Add an example -->
+In the following example, you can see an output of the command line version of `gawd` for a change in the workflow files which can be seen in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db). 
+```python
+>>> gawd old_workflow.yaml new_workflow.yaml
+changed jobs.build-linux-clangpdb-gcc5.steps[1].run from 'sudo apt-get update\nsudo apt-get install nasm ...' to 'sudo apt-get update\nsudo apt-get install nasm ...'
+renamed jobs.build-linux-clang38 to jobs.build-linux-clangdwarf
+changed jobs.build-linux-clang38.name from 'Build Linux CLANG38' to 'Build Linux CLANGDWARF'
+changed jobs.build-linux-clang38.env.TOOLCHAINS from 'CLANG38' to 'CLANGDWARF'
+changed jobs.build-linux-clang38.steps[6].with.name from 'Linux CLANG38 Artifacts' to 'Linux CLANGDWARF Artifacts'
+```
 
 ### As an importable library
 
