@@ -159,34 +159,33 @@ def find_changes(lpath, v1, rpath, v2):
 
 def diff_workflows(w1, w2):
     """
-    Returns the list of differences between two workflow files
+    Return the list of differences between two workflow files provided as
+    dictionaries (e.g., loaded using ruamel.yaml).
 
-         Parameters:
-                w1 : old version of workflow yaml file
-                w2 : new version of workflow yaml file
-
-        Returns:
-                changes (str): list of the diff between w1 and w2 yaml files
+    The list of differences is provided as a list of 5-uples of the form:
+    (kind, old_path, old_value, new_path, new_value).
     """
     changes = []
 
     # Compare workflows except their "on" and "jobs" keys (specific treatment for them)
-    changes.extend(
-        find_changes(
-            "", 
-            [{k: v} for k, v in w1.items() if k not in ["on", "jobs"]], 
-            "", 
-            [{k: v} for k, v in w2.items() if k not in ["on", "jobs"]], 
-        )
-    )
+    for key in w1:
+        if key not in ["on", "jobs"]:
+            if key not in w2:
+                changes.append(("removed", key, w1[key], None, None))
+            else:
+                changes.extend(find_changes(key, w1[key], key, w2[key]))
+    for key in w2:
+        if key not in ["on", "jobs"]:
+            if key not in w1:
+                changes.append(("added", None, None, key, w2[key]))
 
     # Specific handling of "on" when it's a list or str and not a dict
-    if 'on' in w1: 
-        if 'on' not in w2: 
-            changes.append(('removed', 'on', w1['on'], None, None))
+    if "on" in w1:
+        if "on" not in w2:
+            changes.append(("removed", "on", w1["on"], None, None))
         else:
-            w1_on = w1['on']
-            w2_on = w2['on']
+            w1_on = w1["on"]
+            w2_on = w2["on"]
 
             # Convert w1['on'] to dict
             if not isinstance(w1_on, dict):
@@ -199,10 +198,10 @@ def diff_workflows(w1, w2):
                 if not isinstance(w2_on, list):
                     w2_on = [w2_on]
                 w2_on = {k: None for k in w2_on}
-            
-            changes.extend(find_changes('on', w1_on, 'on', w2_on))
-    elif 'on' in w2:
-        changes.append(('added', None, None, 'on', w2['on']))
+
+            changes.extend(find_changes("on", w1_on, "on", w2_on))
+    elif "on" in w2:
+        changes.append(("added", None, None, "on", w2["on"]))
 
     # Specific handling of jobs
     jobs1 = list(w1.get("jobs", {}).items())
@@ -250,14 +249,12 @@ def diff_workflows(w1, w2):
 
 def diff_workflow_files(w1, w2):
     """
-    Returns the diff of two workflow files in list format
+    Return the list of differences between two workflow files.
+    w1 and w2 are respectively the path to the old workflow file and the path
+    to the new workflow file.
 
-         Parameters:
-                w1 (str): path to old version of workflow file
-                w2 (str): path to new version of workflow file
-
-        Returns:
-                diff_workflows(w1, w2) (str): list of the diff of w1 and w2
+    The returned list of differences contains 5-uples of the form:
+    (kind, old_path, old_value, new_path, new_value).
     """
     import ruamel.yaml as yaml
 
@@ -276,7 +273,7 @@ def cli():
 
     parser = argparse.ArgumentParser(
         prog="gawd",
-        description="GAWD is a GitHub Actions Workflow Differ",
+        description="gawd is a GitHub Actions Workflow Differ",
     )
 
     parser.add_argument("old", type=str, help="path to old workflow file")
@@ -315,9 +312,12 @@ def cli():
     POSITION_WEIGHT = args.POSITION_WEIGHT
     JOB_NAME_WEIGHT = args.JOB_NAME_WEIGHT
 
-    for kind, o_path, o_value, n_path, n_value in diff_workflow_files(
-        args.old, args.new
-    ):
+    differences = diff_workflow_files(args.old, args.new)
+
+    _sort = lambda x: x[1] if x[1] is not None else x[3]
+    differences = sorted(differences, key=_sort)
+
+    for kind, o_path, o_value, n_path, n_value in differences:
         if kind == "added":
             print(f"added {n_path} with {n_value!r}")
         elif kind == "removed":
@@ -329,4 +329,4 @@ def cli():
         elif kind == "renamed":
             print(f"renamed {o_path} to {n_path}")
         else:
-            raise ValueError(f"Unsupported change {kind}, please open an issue")
+            raise ValueError(f"Unsupported change `{kind}`, please open an issue")
