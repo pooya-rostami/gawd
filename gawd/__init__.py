@@ -326,8 +326,9 @@ def cli():
 
     differences = diff_workflow_files(args.old, args.new)
 
-    _sort = lambda x: x[1] if x[1] is not None else x[3]
-    differences = sorted(differences, key=_sort)
+    # Uncomment these two lines to get a pseudo-sorted list of changes
+    # _sort = lambda x: x[1] if x[1] is not None else x[3]
+    # differences = sorted(differences, key=_sort)
 
     for kind, o_path, o_value, n_path, n_value in differences:
         if kind == "added":
