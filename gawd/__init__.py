@@ -239,6 +239,16 @@ def diff_workflows(w1, w2):
 
 
 def diff_workflow_files(w1, w2):
+    """
+    Returns the diff of two workflow files in text format
+
+         Parameters:
+                w1 (str): path to old version of workflow file
+                w2 (str): path to new version of workflow file
+
+        Returns:
+                diff_workflows(w1, w2) (str): string of the diff of w1 and w2
+    """
     import ruamel.yaml as yaml
 
     with open(w1) as f1:
