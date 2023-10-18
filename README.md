@@ -86,7 +86,9 @@ Similarly to the extra parameters that can be provided to the CLI tool, the `gaw
 The following example shows the output of the imported library version of `gawd` for the changes made to the workflow file `main.yml` in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db).
 ```python
 >>> from gawd import diff_workflow_files
->>> diff_workflow_files(path to old workflow file, path to new workflow file)
+>>> old_workflow_path = ...
+>>> new_workflow_path = ...
+>>> diff_workflow_files(old_workflow_path, new_workflow_path)
 [('changed', 'jobs.build-linux-clangpdb-gcc5.steps[1].run', 'sudo apt-get update\nsudo apt-get install nasm ...', 'jobs.build-linux-clangpdb-gcc5.steps[1].run', 'sudo apt-get update\nsudo apt-get install nasm ...'),
 ('renamed', 'jobs.build-linux-clang38', {'name': 'Build Linux CLANG38', ...}, 'jobs.build-linux-clangdwarf', {'name': 'Build Linux CLANGDWARF', ...}),
 ('changed', 'jobs.build-linux-clang38.name', 'Build Linux CLANG38', 'jobs.build-linux-clangdwarf.name', 'Build Linux CLANGDWARF'),
