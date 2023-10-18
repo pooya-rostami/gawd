@@ -13,7 +13,7 @@ POSITION_WEIGHT = 0.2
 JOB_NAME_WEIGHT = 0.1
 
 
-def find_matches(s1, s2):
+def find_list_matches(s1, s2):
     """
     Return a list of matches between items from s1 and items from s2.
 
@@ -37,6 +37,39 @@ def find_matches(s1, s2):
     matches = []
     found_in_s1 = set()  # List of positions
     found_in_s2 = set()  # List of positions
+    for (i, a), (j, b), score in sorted(candidates, key=lambda t: t[2]):
+        if i in found_in_s1 or j in found_in_s2:
+            continue
+
+        matches.append(((i, a), (j, b), score))
+        found_in_s1.add(i)
+        found_in_s2.add(j)
+
+    return matches
+
+
+def find_job_matches(j1, j2):
+    """
+    Return a list of matches between jobs from j1 and j2 (as dict).
+
+    A distance score is computed for all combinations.
+
+    The returned list of matches is composed of (sorted) triples:
+    ((i, a), (j, b), score) where `score` is the distance score, `a` and `b`
+    are items respectively from `j1` and `j2`, and `i` and `j` their names.
+    """
+    candidates = []
+
+    # List all combinations and compute their distance scores
+    for (i, a), (j, b) in itertools.product(j1.items(), j2.items()):
+        # Compute a score including a penalty if positions differ
+        score = (1 - JOB_NAME_WEIGHT) * distance(a, b) + JOB_NAME_WEIGHT * distance(i, j)
+        candidates.append(((i, a), (j, b), score))
+
+    # Find best matches
+    matches = []
+    found_in_s1 = set()  # List of names
+    found_in_s2 = set()  # List of names
     for (i, a), (j, b), score in sorted(candidates, key=lambda t: t[2]):
         if i in found_in_s1 or j in found_in_s2:
             continue
@@ -77,7 +110,7 @@ def distance(v1, v2):
     elif isinstance(v1, dict) and isinstance(v2, dict):
         return dict_distance(v1, v2)
     elif isinstance(v1, list) and isinstance(v2, list):
-        matches = find_matches(v1, v2)
+        matches = find_list_matches(v1, v2)
         score = sum(score for _, _, score in matches)
         extra = max(len(v1), len(v2)) - len(matches)
         return (score + extra) / (len(matches) + extra)
@@ -111,7 +144,7 @@ def dict_changes(lpath, v1, rpath, v2):
 
 def list_changes(lpath, v1, rpath, v2):
     """Return what changed between v1 and v2, being lists."""
-    matches = find_matches(v1, v2)
+    matches = find_list_matches(v1, v2)
 
     changes = []
     left_matched = set()
@@ -211,43 +244,28 @@ def diff_workflows(w1, w2):
         changes.append(("added", None, None, "on", w2["on"]))
 
     # Specific handling of jobs
-    jobs1 = list(w1.get("jobs", {}).items())
-    jobs2 = list(w2.get("jobs", {}).items())
-    matches = find_matches([v for _, v in jobs1], [v for _, v in jobs2])
-
-    # Update score to take the names into account
-    n_matches = []
-    for (i, a), (j, b), score in matches:
-        left_name = jobs1[i][0]
-        right_name = jobs2[j][0]
-
-        n_score = (1 - JOB_NAME_WEIGHT) * score + JOB_NAME_WEIGHT * distance(
-            left_name, right_name
-        )
-        if n_score <= THRESHOLD:
-            n_matches.append(((i, a), (j, b), n_score))
-    matches = sorted(n_matches, key=lambda t: t[2])
+    jobs1 = w1.get("jobs", {})
+    jobs2 = w2.get("jobs", {})
+    matches = find_job_matches(jobs1, jobs2)
 
     # Detect renamings and changes
     left_matched = set()
     right_matched = set()
-    for (i, a), (j, b), score in matches:
-        left_name = jobs1[i][0]
-        right_name = jobs2[j][0]
+    for (left_name, a), (right_name, b), score in matches:
+        if score <= THRESHOLD:
+            # Did we rename a job?
+            if left_name != right_name:
+                changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
 
-        # Did we rename a job?
-        if left_name != right_name:
-            changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
-
-        changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
-        left_matched.add(left_name)
-        right_matched.add(right_name)
+            changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
+            left_matched.add(left_name)
+            right_matched.add(right_name)
 
     # Handling of non-matched jobs
-    for name, job in jobs1:
+    for name, job in jobs1.items():
         if name not in left_matched:
             changes.append(("removed", "jobs." + name, job, None, None))
-    for name, job in jobs2:
+    for name, job in jobs2.items():
         if name not in right_matched:
             changes.append(("added", None, None, "jobs." + name, job))
 
@@ -283,8 +301,8 @@ def cli():
         description="gawd is a GitHub Actions Workflow Differ",
     )
 
-    parser.add_argument("old", type=str, help="path to old workflow file")
-    parser.add_argument("new", type=str, help="path to new workflow file")
+    parser.add_argument("first", type=str, help="path to first workflow file")
+    parser.add_argument("second", type=str, help="path to second workflow file")
     parser.add_argument(
         "--threshold",
         "-t",
@@ -319,7 +337,7 @@ def cli():
     POSITION_WEIGHT = args.POSITION_WEIGHT
     JOB_NAME_WEIGHT = args.JOB_NAME_WEIGHT
 
-    differences = diff_workflow_files(args.old, args.new)
+    differences = diff_workflow_files(args.first, args.second)
 
     # Uncomment these two lines to get a pseudo-sorted list of changes
     # _sort = lambda x: x[1] if x[1] is not None else x[3]
