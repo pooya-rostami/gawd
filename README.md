@@ -6,8 +6,8 @@
 [![Commits](https://badgen.net/github/last-commit/pooya-rostami/gawd)](https://github.com/pooya-rostami/gawd/commits/)
 
 `gawd` stands for **G**itHub **A**ctions **W**orkflow **D**iffer.
-It is a Python library and command-line tool that computes all changes (i.e., diffs) between two GitHub Actions workflow files. 
-Given a pair of workflow files as input, and taking the specific syntax of GitHub Actions into account, `gawd` reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity. 
+It is a Python library and command-line tool that computes all changes (i.e., diffs) between two GitHub Actions workflow files.
+Given a pair of workflow files as input, and taking the specific syntax of GitHub Actions into account, `gawd` reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity.
 
 ## Table of contents
 
@@ -33,8 +33,8 @@ and can be installed with `pip install git+https://github.com/pooya-rostami/gawd
 
 ### As a command-line tool
 
-After installation, the `gawd` command-line tool should be available in your shell. 
-Otherwhise, you can call it using `python -m gawd`. 
+After installation, the `gawd` command-line tool should be available in your shell.
+Otherwhise, you can call it using `python -m gawd`.
 
 ```
 usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X] first second
@@ -55,8 +55,8 @@ options:
                         weight of job names when comparing jobs (default is 0.1)
 ```
 
-<!-- **TODO**: Add an example -->
-The following example shows the output of the command line version of `gawd` when applied to compute the changes made to the workflow file main.yml which can be seen in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db). 
+
+The following example shows the output of the command line version of `gawd` when applied to compute the changes made to the workflow file main.yml which can be seen in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db).
 ```python
 >>> gawd old_main.yaml new_main.yaml
 changed jobs.build-linux-clangpdb-gcc5.steps[1].run from 'sudo apt-get update\nsudo apt-get install nasm ...'
@@ -72,25 +72,25 @@ changed jobs.build-linux-clang38.steps[6].with.name from 'Linux CLANG38 Artifact
 
 ### As an importable library
 
-`gawd` comes with two functions to compare workflow files, namely `diff_workflow_files` and `diff_workflows`. 
-The former accepts the paths to two workflow files, loads them and returns the output of `diff_workflows`. 
+`gawd` comes with two functions to compare workflow files, namely `diff_workflow_files` and `diff_workflows`.
+The former accepts the paths to two workflow files, loads them and returns the output of `diff_workflows`.
 The latter accepts two workflows as Python dictionaries (e.g., loaded with `ruamel.yaml`) and returns a list of 5-tuples `(kind, old_path, old_value, new_path, new_value)`.
 
-The `kind` component is one of `added, removed, changed, moved, renamed` and indicates the kind of change. 
-`old_path` and `new_path` correspond to a dotted notation indicating where the change occurred, while `old_value` and `new_value` correspond to the previous and new values, respectively. 
-Notice that `old_path` and `old_value` are set to `None` in case of an "added" change. Similarly, `new_path` and `old_path` are `None` in case of a "removed" change. 
+The `kind` component is one of `added, removed, changed, moved, renamed` and indicates the kind of change.
+`old_path` and `new_path` correspond to a dotted notation indicating where the change occurred, while `old_value` and `new_value` correspond to the previous and new values, respectively.
+Notice that `old_path` and `old_value` are set to `None` in case of an "added" change. Similarly, `new_path` and `old_path` are `None` in case of a "removed" change.
 
-Similarly to the extra parameters that can be provided to the CLI tool, the `gawd` module exposes `THRESHOLD`, `POSITION_WEIGHT` and `JOB_NAME_WEIGHT`. 
+Similarly to the extra parameters that can be provided to the CLI tool, the `gawd` module exposes `THRESHOLD`, `POSITION_WEIGHT` and `JOB_NAME_WEIGHT`.
 
-<!-- **TODO**: Add an example -->
-The following example shows the output of the imported library version of `gawd` for the changes made to the workflow file main.yml which can be seen in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db). 
+
+The following example shows the output of the imported library version of `gawd` for the changes made to the workflow file `main.yml` in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db).
 ```python
->>> from __init__ import diff_workflow_files
+>>> from gawd import diff_workflow_files
 >>> diff_workflow_files(path to old workflow file, path to new workflow file)
-[('changed', 'jobs.build-linux-clangpdb-gcc5.steps[1].run', 'sudo apt-get update\nsudo apt-get install nasm ...', 'jobs.build-linux-clangpdb-gcc5.steps[1].run', 'sudo apt-get update\nsudo apt-get install nasm ...'), 
-('renamed', 'jobs.build-linux-clang38', {'name': 'Build Linux CLANG38', ...}, 'jobs.build-linux-clangdwarf', {'name': 'Build Linux CLANGDWARF', ...}), 
-('changed', 'jobs.build-linux-clang38.name', 'Build Linux CLANG38', 'jobs.build-linux-clangdwarf.name', 'Build Linux CLANGDWARF'), 
-('changed', 'jobs.build-linux-clang38.env.TOOLCHAINS', 'CLANG38', 'jobs.build-linux-clangdwarf.env.TOOLCHAINS', 'CLANGDWARF'), 
+[('changed', 'jobs.build-linux-clangpdb-gcc5.steps[1].run', 'sudo apt-get update\nsudo apt-get install nasm ...', 'jobs.build-linux-clangpdb-gcc5.steps[1].run', 'sudo apt-get update\nsudo apt-get install nasm ...'),
+('renamed', 'jobs.build-linux-clang38', {'name': 'Build Linux CLANG38', ...}, 'jobs.build-linux-clangdwarf', {'name': 'Build Linux CLANGDWARF', ...}),
+('changed', 'jobs.build-linux-clang38.name', 'Build Linux CLANG38', 'jobs.build-linux-clangdwarf.name', 'Build Linux CLANGDWARF'),
+('changed', 'jobs.build-linux-clang38.env.TOOLCHAINS', 'CLANG38', 'jobs.build-linux-clangdwarf.env.TOOLCHAINS', 'CLANGDWARF'),
 ('changed', 'jobs.build-linux-clang38.steps[6].with.name', 'Linux CLANG38 Artifacts', 'jobs.build-linux-clangdwarf.steps[6].with.name', 'Linux CLANGDWARF Artifacts')]
 ```
 

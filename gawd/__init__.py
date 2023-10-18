@@ -10,7 +10,7 @@ THRESHOLD = 0.5
 # Weight of the relative positions between two items
 POSITION_WEIGHT = 0.2
 # Weight of the difference between job names
-JOB_NAME_WEIGHT = 0.1
+JOB_NAME_WEIGHT = 0.2
 
 
 def find_list_matches(s1, s2):
@@ -318,7 +318,7 @@ def cli():
         dest="POSITION_WEIGHT",
         metavar="X",
         type=float,
-        help=f"weight of list positions when comparing sequences (default is {POSITION_WEIGHT})",
+        help=f"weight of item positions when comparing sequences (default is {POSITION_WEIGHT})",
         default=POSITION_WEIGHT,
     )
     parser.add_argument(
