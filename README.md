@@ -37,22 +37,23 @@ After installation, the `gawd` command-line tool should be available in your she
 Otherwhise, you can call it using `python -m gawd`.
 
 ```
-usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X] first second
+usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X] [--short] first second
 
 gawd is a GitHub Actions Workflow Differ
 
 positional arguments:
-  first                   path to first workflow file
-  second                  path to second workflow file
+  first                 path to first workflow file
+  second                path to second workflow file
 
 options:
   -h, --help            show this help message and exit
-  --threshold X, -t X   distance threshold to map items, higher values favour "changed", "moved" and "renamed",
-                        lower values favour "added" and "removed" (default is 0.5)
+  --threshold X, -t X   distance threshold to map items, higher values favours "changed", lower values favours
+                        "added" and "removed" (default is 0.5)
   --position-weight X, -p X
-                        weight of item positions when comparing sequences (default is 0.1)
+                        weight of item positions when comparing sequences (default is 0.2)
   --job-name-weight X, -j X
-                        weight of job names when comparing jobs (default is 0.1)
+                        weight of job names when comparing jobs (default is 0.2)
+  --short, -s           limit the output of values to a few characters
 ```
 
 

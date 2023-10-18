@@ -330,6 +330,13 @@ def cli():
         help=f"weight of job names when comparing jobs (default is {JOB_NAME_WEIGHT})",
         default=JOB_NAME_WEIGHT,
     )
+    parser.add_argument(
+        "--short",
+        "-s",
+        dest="short",
+        action='store_true',
+        help=f"limit the output of values to a few characters",
+    )
 
     args, parameters = parser.parse_known_args()
 
@@ -343,13 +350,18 @@ def cli():
     # _sort = lambda x: x[1] if x[1] is not None else x[3]
     # differences = sorted(differences, key=_sort)
 
+    if args.short:
+        _format = lambda o: repr(o)[:20] + ' (...) ' + repr(o)[-10:] if len(repr(o)) >= 30 else repr(o)
+    else:
+        _format = repr
+
     for kind, o_path, o_value, n_path, n_value in differences:
         if kind == "added":
-            print(f"added {n_path} with {n_value!r}")
+            print(f"added {n_path} with \"{_format(n_value)}\"")
         elif kind == "removed":
-            print(f"removed {o_path} with {o_value!r}")
+            print(f"removed {o_path} with \"{_format(o_value)}\"")
         elif kind == "changed":
-            print(f"changed {o_path} from {o_value!r} to {n_value!r}")
+            print(f"changed {o_path} from \"{_format(o_value)}\" to \"{_format(n_value)}\"")
         elif kind == "moved":
             print(f"moved {o_path} to {n_path}")
         elif kind == "renamed":
