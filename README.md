@@ -59,16 +59,12 @@ options:
 
 The following example shows the output of the command line version of `gawd` when applied to compute the changes made to the workflow file main.yml which can be seen in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db).
 ```python
->>> gawd old_main.yaml new_main.yaml
-changed jobs.build-linux-clangpdb-gcc5.steps[1].run from 'sudo apt-get update\nsudo apt-get install nasm ...'
-                                                    to 'sudo apt-get update\nsudo apt-get install nasm ...'
+>>> gawd --short old_main.yaml new_main.yaml
+changed jobs.build-linux-clangpdb-gcc5.steps[1].run from "'sudo apt-get update (...) UB_PATH\n'" to "'sudo apt-get update (...) UB_PATH\n'"
 renamed jobs.build-linux-clang38 to jobs.build-linux-clangdwarf
-changed jobs.build-linux-clang38.name from 'Build Linux CLANG38'
-                                      to 'Build Linux CLANGDWARF'
-changed jobs.build-linux-clang38.env.TOOLCHAINS from 'CLANG38'
-                                                to 'CLANGDWARF'
-changed jobs.build-linux-clang38.steps[6].with.name from 'Linux CLANG38 Artifacts'
-                                                    to 'Linux CLANGDWARF Artifacts'
+changed jobs.build-linux-clang38.name from "'Build Linux CLANG38'" to "'Build Linux CLANGDWARF'"
+changed jobs.build-linux-clang38.env.TOOLCHAINS from "'CLANG38'" to "'CLANGDWARF'"
+changed jobs.build-linux-clang38.steps[6].with.name from "'Linux CLANG38 Artifacts'" to "'Linux CLANGDWARF Artifacts'"
 ```
 
 ### As an importable library
