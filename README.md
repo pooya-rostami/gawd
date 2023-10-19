@@ -31,7 +31,7 @@ and can be installed with `pip install git+https://github.com/pooya-rostami/gawd
 ### As a command-line tool
 
 After installation, the `gawd` command-line tool should be available in your shell.
-Otherwhise, you can call it using `python -m gawd`.
+Otherwise, you can call it using `python -m gawd`.
 
 ```
 usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X] [--short] first second
