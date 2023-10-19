@@ -9,14 +9,6 @@
 It is a Python library and command-line tool that computes all changes (i.e., diffs) between two GitHub Actions workflow files.
 Given a pair of workflow files as input, and taking the specific syntax of GitHub Actions into account, `gawd` reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity.
 
-## Table of contents
-
-  * [Version](#version)
-  * [Installation](#installation)
-  * [Usage](#usage)
-  * [Contributions](#contributions)
-  * [License](#license)
-
 
 ## Installation
 
