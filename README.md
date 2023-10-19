@@ -17,9 +17,6 @@ Given a pair of workflow files as input, and taking the specific syntax of GitHu
   * [Contributions](#contributions)
   * [License](#license)
 
-## Version
-
-`gawd' is developed using Python 3.8+.
 
 ## Installation
 
