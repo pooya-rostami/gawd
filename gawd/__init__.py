@@ -359,7 +359,7 @@ def cli():
         if kind == "added":
             print(f"added {n_path} with \"{_format(n_value)}\"")
         elif kind == "removed":
-            print(f"removed {o_path} with \"{_format(o_value)}\"")
+            print(f"removed {o_path}")
         elif kind == "changed":
             print(f"changed {o_path} from \"{_format(o_value)}\" to \"{_format(n_value)}\"")
         elif kind == "moved":
