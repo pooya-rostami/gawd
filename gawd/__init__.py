@@ -309,7 +309,7 @@ def cli():
         dest="THRESHOLD",
         metavar="X",
         type=float,
-        help=f'distance threshold to map items, higher values favours "changed", lower values favours "added" and "removed" (default is {THRESHOLD})',
+        help=f'ranged from 0 to 1, distance threshold to map items, value closer to 1 favours "changed", value closer to 0 favours "added" and "removed" (default is {THRESHOLD})',
         default=THRESHOLD,
     )
     parser.add_argument(
@@ -318,7 +318,7 @@ def cli():
         dest="POSITION_WEIGHT",
         metavar="X",
         type=float,
-        help=f"weight of item positions when comparing sequences (default is {POSITION_WEIGHT})",
+        help=f"ranged from 0 to 1, weight of item positions when comparing sequences (default is {POSITION_WEIGHT})",
         default=POSITION_WEIGHT,
     )
     parser.add_argument(
@@ -327,7 +327,7 @@ def cli():
         dest="JOB_NAME_WEIGHT",
         metavar="X",
         type=float,
-        help=f"weight of job names when comparing jobs (default is {JOB_NAME_WEIGHT})",
+        help=f"ranged from 0 to 1, weight of job names when comparing jobs (default is {JOB_NAME_WEIGHT})",
         default=JOB_NAME_WEIGHT,
     )
     parser.add_argument(
