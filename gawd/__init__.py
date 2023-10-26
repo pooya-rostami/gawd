@@ -298,11 +298,11 @@ def cli():
 
     parser = argparse.ArgumentParser(
         prog="gawd",
-        description="gawd is a GitHub Actions Workflow Differ",
+        description="gawd is an open source GitHub Actions Workflow Differencing tool that is aware of the specific workflow syntax. Given a pair of workflow files as input, the tool reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity.",
     )
 
-    parser.add_argument("first", type=str, help="path to first workflow file")
-    parser.add_argument("second", type=str, help="path to second workflow file")
+    parser.add_argument("first", type=str, help="path to first workflow YAML file")
+    parser.add_argument("second", type=str, help="path to second workflow YAML file")
     parser.add_argument(
         "--threshold",
         "-t",
