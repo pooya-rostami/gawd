@@ -26,22 +26,30 @@ After installation, the `gawd` command-line tool should be available in your she
 Otherwise, you can call it using `python -m gawd`.
 
 ```
-usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X] [--short] first second
+usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X]
+            [--short]
+            first second
 
-gawd is a GitHub Actions Workflow Differ
+gawd is an open source GitHub Actions Workflow Differencing tool that is aware
+of the specific workflow syntax. Given a pair of workflow files as input, the
+tool reports on the items that were added and removed, as well on items that
+were moved, renamed or changed based on their similarity.
 
 positional arguments:
-  first                 path to first workflow file
-  second                path to second workflow file
+  first                 path to first workflow YAML file
+  second                path to second workflow YAML file
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
-  --threshold X, -t X   distance threshold to map items, higher values favours "changed", lower values favours
-                        "added" and "removed" (default is 0.5)
+  --threshold X, -t X   ranged from 0 to 1, distance threshold to map items,
+                        value closer to 1 favours "changed", value closer to 0
+                        favours "added" and "removed" (default is 0.5)
   --position-weight X, -p X
-                        weight of item positions when comparing sequences (default is 0.2)
+                        ranged from 0 to 1, weight of item positions when
+                        comparing sequences (default is 0.2)
   --job-name-weight X, -j X
-                        weight of job names when comparing jobs (default is 0.2)
+                        ranged from 0 to 1, weight of job names when comparing
+                        jobs (default is 0.2)
   --short, -s           limit the output of values to a few characters
 ```
 
@@ -98,5 +106,8 @@ You can refer to this library using:
   author = {{Rostami Mazrae}, Pooya and Decan, Alexandre},
   title = {gawd: GitHub Actions Workflow Differ},
   url = {https://github.com/pooya-rostami/gawd},
+  year = {2023},
+  version = {1.0.0},
+  institute = {software engineering lab at university of Mons}
 }
 ```
