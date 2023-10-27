@@ -27,7 +27,7 @@ Otherwise, you can call it using `python -m gawd`.
 
 ```
 usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X]
-            [--short]
+            [--short] [--output {text,list,dictionary}]
             first second
 
 gawd is an open source GitHub Actions Workflow Differencing tool that is aware
@@ -51,6 +51,8 @@ optional arguments:
                         ranged from 0 to 1, weight of job names when comparing
                         jobs (default is 0.2)
   --short, -s           limit the output of values to a few characters
+  --output {text,list,dictionary}
+                        decide on how the output to be shown (default is text)
 ```
 
 
