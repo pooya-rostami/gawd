@@ -10,8 +10,10 @@ class TestTextDiffTool:
         assert gawd.distance('ab', 'ab') == 0 # same text
         assert gawd.distance(['a', 'b', 'ab'], ['a', 'b', 'ab']) == 0 # same list
         assert gawd.distance(['a', 'b', None], ['a', 'b', None]) == 0 # same list including None
+        assert gawd.distance(['a', 'b', None], ['a', None, 'b']) != 0 # list with different placing of values 
         assert gawd.distance({'a':1, 'b':0, 'ab':2}, {'a':1, 'b':0, 'ab':2}) == 0 # same dictionary
         assert gawd.distance({'a':None, 'b':0, 'ab':None}, {'a':None, 'b':0, 'ab':None}) == 0 # same dictionary including None
+        assert gawd.distance({'a':None, 'b':0, 'ab':None}, {'a':None, 'ab':None, 'b':0}) == 0 # same dictionary different placing of keys
         assert gawd.distance(None, None) == 0 # both None
 
 
