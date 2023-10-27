@@ -337,6 +337,14 @@ def cli():
         action='store_true',
         help=f"limit the output of values to a few characters",
     )
+    parser.add_argument(
+        "--output",
+        dest="output",
+        choices=['text', 'list', 'dictionary'],
+        action='store',
+        help=f"decide on how the output to be shown (default is text)",
+        default='text'
+    )
 
     args, parameters = parser.parse_known_args()
 
@@ -355,16 +363,35 @@ def cli():
     else:
         _format = repr
 
-    for kind, o_path, o_value, n_path, n_value in differences:
-        if kind == "added":
-            print(f"added {n_path} with \"{_format(n_value)}\"")
-        elif kind == "removed":
-            print(f"removed {o_path}")
-        elif kind == "changed":
-            print(f"changed {o_path} from \"{_format(o_value)}\" to \"{_format(n_value)}\"")
-        elif kind == "moved":
-            print(f"moved {o_path} to {n_path}")
-        elif kind == "renamed":
-            print(f"renamed {o_path} to {n_path}")
-        else:
-            raise ValueError(f"Unsupported change `{kind}`, please open an issue")
+    if args.output == "text":
+        for kind, o_path, o_value, n_path, n_value in differences:
+            if kind == "added":
+                print(f"added {n_path} with \"{_format(n_value)}\"")
+            elif kind == "removed":
+                print(f"removed {o_path}")
+            elif kind == "changed":
+                print(f"changed {o_path} from \"{_format(o_value)}\" to \"{_format(n_value)}\"")
+            elif kind == "moved":
+                print(f"moved {o_path} to {n_path}")
+            elif kind == "renamed":
+                print(f"renamed {o_path} to {n_path}")
+            else:
+                raise ValueError(f"Unsupported change `{kind}`, please open an issue")
+    elif args.output == "list":
+        output_list = []
+        for kind, o_path, o_value, n_path, n_value in differences:
+            if kind in ["added", "removed", "changed", "moved", "renamed"]:
+                output_list.append([kind, o_path, o_value, n_path, n_value])
+            else:
+                raise ValueError(f"Unsupported change `{kind}`, please open an issue")
+        print(output_list)
+    elif args.output == "dictionary":
+        import json
+        output_list = []
+        for kind, o_path, o_value, n_path, n_value in differences:
+            if kind in ["added", "removed", "changed", "moved", "renamed"]:
+                dict_output = {"type": kind, "old_path": o_path, "old_value": o_value, "new_path": n_path, "new_value":n_value}
+                output_list.append(dict_output)
+            else:
+                raise ValueError(f"Unsupported change `{kind}`, please open an issue")
+        print(json.dumps(output_list))
