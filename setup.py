@@ -9,7 +9,7 @@ with open(
 
 setup(
     name="gawd",
-    version="1.0.0",
+    version="1.1.0-pre1",
     license="LGPLv3",
     author="Pooya Rostami Mazrae, Alexandre Decan",
     url="https://github.com/pooya-rostami/gawd",
@@ -35,7 +35,7 @@ setup(
     packages=find_packages(include=["gawd"]),
     python_requires="~= 3.8",
     install_requires=[
-        "ruamel.yaml ~= 0.17",
+        "ruamel.yaml ~= 0.18",
     ],
     extras_require={
         "test": ["pytest ~= 7.0"],
