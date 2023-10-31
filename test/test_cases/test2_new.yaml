@@ -1,0 +1,30 @@
+name: Code Coverage
+
+on: [push, pull_request]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      PYTHON: '3.8'
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+      - name: Install requirements
+        run: |
+          pip install pyfaidx==0.5.8
+          pip install pytest
+      - name: Build extension
+        run: python setup.py build_ext -i
+        env:
+          CPPFLAGS: -fprofile-arcs -ftest-coverage -O0
+      - name: Generate coverage report
+        run: pytest --cov tests
+      - name: Upload Coverage to CodeCov
+        uses: codecov/codecov-action@v3
+        with:
+          fail_ci_if_error: true

@@ -1,0 +1,95 @@
+name: Automatic Builds
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install wxWidgets and PortAudio
+      run: sudo apt update && sudo apt install libwxgtk3.0-dev portaudio19-dev -y
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Compile
+      run: make -j$(nproc)
+    - name: Upload
+      uses: actions/upload-artifact@master
+      with:
+        name: noods-linux
+        path: noods
+
+  build-mac:
+    runs-on: macos-latest
+
+    steps:
+    - name: Install wxWidgets and PortAudio
+      run: brew install wxmac portaudio
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Compile
+      run: make -j$(sysctl -n hw.logicalcpu)
+    - name: Upload
+      uses: actions/upload-artifact@master
+      with:
+        name: noods-mac
+        path: noods
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Install MSYS2
+      run: choco install msys2
+      shell: cmd
+    - name: Install build tools, wxWidgets, and PortAudio
+      run: C:\tools\msys64\usr\bin\bash -lc "pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-wxWidgets mingw-w64-x86_64-portaudio mingw-w64-x86_64-jbigkit make --noconfirm"
+      shell: cmd
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Compile
+      run: C:\tools\msys64\usr\bin\bash -lc "cd /d/a/NooDS/NooDS && export PATH=$PATH:/mingw64/bin && make -j$(nproc) && strip noods.exe"
+      shell: cmd
+    - name: Upload
+      uses: actions/upload-artifact@master
+      with:
+        name: noods-windows
+        path: noods.exe
+
+  build-switch:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkita64:latest
+
+    steps:
+    - name: Downgrade devkitA64 to r14
+      run: wget "https://wii.leseratte10.de/devkitPro/devkitA64/r14 (2019-12)/devkitA64-r14-3-linux.pkg.tar.xz" && sudo dkp-pacman -U devkitA64-r14-3-linux.pkg.tar.xz --noconfirm
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Compile
+      run: make -f Makefile.switch -j$(nproc)
+    - name: Upload
+      uses: actions/upload-artifact@master
+      with:
+        name: noods-switch
+        path: noods.nro
+
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Compile
+      run: ./gradlew assembleRelease && mv build-android/outputs/apk/release/android-release-unsigned.apk noods.apk
+    - name: Sign
+      run: $ANDROID_SDK_ROOT/build-tools/29.0.3/apksigner sign --ks keystore.jks --ks-pass pass:$KEYSTORE_PASS noods.apk
+      env:
+        KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+    - name: Upload
+      uses: actions/upload-artifact@master
+      with:
+        name: noods-android
+        path: noods.apk

@@ -1,0 +1,249 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+env:
+  PROJECT_TYPE: UEFI
+  FORCE_INSTALL: 1
+  HAS_OPENSSL_BUILD: 1
+  HAS_OPENSSL_W32BUILD: 0
+  WERROR: 1
+
+jobs:
+  build-macos:
+    name: Build macOS XCODE5
+    runs-on: macos-latest
+    env:
+      JOB_TYPE: BUILD
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Add Linux Toolchain
+        run: brew tap FiloSottile/homebrew-musl-cross
+
+      - name: Install Linux Toolchain
+        run: brew install musl-cross
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+          HOMEBREW_NO_AUTO_UPDATE: 1
+
+      - name: Install Dependencies
+        run: brew install openssl mingw-w64
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+          HOMEBREW_NO_AUTO_UPDATE: 1
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./build_duet.tool
+      - run: ./build_oc.tool
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: macOS XCODE5 Artifacts
+          path: Binaries/*.zip
+      - name: Upload to Release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@e74ff71f7d8a4c4745b560a485cc5fdb9b5b999d
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: Binaries/*.zip
+          tag: ${{ github.ref }}
+          file_glob: true
+
+  build-linux-clangpdb-gcc5:
+    name: Build Linux CLANGPDB/GCC5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install nasm uuid-dev libssl-dev iasl
+          file="clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04"
+          suf=".tar.xz"
+          curl -LO "https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/${file}${suf}" || exit 1
+          sum=$(shasum -a 256 "${file}${suf}" | cut -f1 -d' ')
+          expsum="2c2fb857af97f41a5032e9ecadf7f78d3eff389a5cd3c9ec620d24f134ceb3c8"
+          if [ "$sum" != "$expsum" ]; then echo "Invalid checksum $sum" ; exit 1 ; fi
+          tar -xf "${file}${suf}" || exit 1
+          echo "$(pwd)/${file}/bin" >> $GITHUB_PATH
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./build_duet.tool
+      - run: ./build_oc.tool
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linux CLANGPDB-GCC5 Artifacts
+          path: Binaries/*.zip
+
+  build-linux-clang38:
+    name: Build Linux CLANG38
+    runs-on: ubuntu-latest
+    env:
+      TOOLCHAINS: CLANG38
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install nasm uuid-dev iasl doxygen texlive texlive-latex-extra
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 13
+          echo "/usr/lib/llvm-13/bin" >> $GITHUB_PATH
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./build_duet.tool
+      - run: ./build_oc.tool
+
+      - name: Build Docs
+        run: |
+          abort() { tail -200 log.txt ; exit 1 ; }
+          doxygen Doxyfile &> log.txt || abort
+          cd Doxy/latex || abort
+          make pdf &> log.txt || abort
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linux CLANG38 Artifacts
+          path: Binaries/*.zip
+
+  build-windows:
+    name: Build Windows VS2019
+    runs-on: windows-latest
+    env:
+      HAS_OPENSSL_BUILD: 0
+      CC: gcc
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          choco install make nasm zip --no-progress
+          choco install iasl --no-progress --version=2017.11.10
+
+      - name: CI Bootstrap
+        run: |
+          src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./build_duet.tool
+      - run: ./build_oc.tool
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows Artifacts
+          path: Binaries/*.zip
+
+  analyze-scripts:
+    name: Analyze Scripts
+    runs-on: macos-latest
+    env:
+      JOB_TYPE: ANALYZE
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          brew install shellcheck
+          pip2 install pyyaml
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - name: Run shellcheck
+        run: find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
+
+      - name: Check AppleModels
+        working-directory: AppleModels
+        run: |
+          pwd
+          ls
+          python2 ./update_generated.py  || exit 1
+          if [ "$(git status --porcelain)" != "" ]; then echo "DataBase desync"; exit 1 ; fi
+
+      - name: Lint Samples
+        run: |
+          File='Docs/Sample.plist'
+          plutil -lint "${File}" || exit 1
+          /usr/libexec/PlistBuddy -c 'Save' "${File}"
+          awk ' /<data>$/     {inside=1; printf $0; next}
+                /<\/data>$/   {inside=0; print "</data>"; next}
+                inside        {gsub ("\t", "", $0); printf $0; next}
+                              {print}' "${File}" > "${File}.tmp" && mv "${File}.tmp" "${File}"
+          if [ "$(git diff ${File})" != '' ]; then echo "Not in Xcode style or not in alphabetical order!!"; exit 1 ; fi
+
+          File='Docs/SampleCustom.plist'
+          plutil -lint "${File}" || exit 1
+          /usr/libexec/PlistBuddy -c 'Save' "${File}"
+          awk ' /<data>$/     {inside=1; printf $0; next}
+                /<\/data>$/   {inside=0; print "</data>"; next}
+                inside        {gsub ("\t", "", $0); printf $0; next}
+                              {print}' "${File}" > "${File}.tmp" && mv "${File}.tmp" "${File}"
+          if [ "$(git diff ${File})" != '' ]; then echo "Not in Xcode style or not in alphabetical order!!"; exit 1 ; fi
+
+  analyze-docs-linux:
+    name: Analyze Documentation
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'acidanthera' && github.ref_name == 'master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install texlive latexdiff
+
+      - name: Check documentation
+        run: |
+          ./Docs/BuildDocs.tool
+
+  analyze-coverity:
+    name: Analyze Coverity
+    runs-on: macos-latest
+    env:
+      JOB_TYPE: COVERITY
+    if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./build_oc.tool --skip-build --skip-package
+
+      - name: Run Coverity
+        working-directory: UDK
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/coverity/covstrap.sh) && eval "$src" || exit 1
+        env:
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+          COVERITY_BUILD_COMMAND: ../build_oc.tool --skip-tests --skip-package RELEASE
