@@ -150,7 +150,7 @@ def list_changes(lpath, v1, rpath, v2):
     right_matched = set()
     for (i, a), (j, b), score in matches:
         if score > THRESHOLD:
-            break  # Early out, no more match can be above THRESHOLD
+            break  # Early out, no more match can be below THRESHOLD
         n_lpath = "{}[{}]".format(lpath, i)
         n_rpath = "{}[{}]".format(rpath, j)
         # Detect moves
@@ -251,14 +251,16 @@ def diff_workflows(w1, w2):
     left_matched = set()
     right_matched = set()
     for (left_name, a), (right_name, b), score in matches:
-        if score <= THRESHOLD:
-            # Did we rename a job?
-            if left_name != right_name:
-                changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
+        if score > THRESHOLD:  # Early out, no more match can be below THRESHOLD
+            break
 
-            changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
-            left_matched.add(left_name)
-            right_matched.add(right_name)
+        # Was the job renamed?
+        if left_name != right_name:
+            changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
+
+        changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
+        left_matched.add(left_name)
+        right_matched.add(right_name)
 
     # Handling of non-matched jobs
     for name, job in jobs1.items():
