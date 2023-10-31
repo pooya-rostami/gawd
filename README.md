@@ -27,17 +27,15 @@ Otherwise, you can call it using `python -m gawd`.
 
 ```
 usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X]
-            [--short] [--output {text,list,dictionary}]
+            [--short] [--json]
             first second
 
-gawd is an open source GitHub Actions Workflow Differencing tool that is aware
-of the specific workflow syntax. Given a pair of workflow files as input, the
-tool reports on the items that were added and removed, as well on items that
-were moved, renamed or changed based on their similarity.
+gawd is an open source GitHub Actions Workflow Differencing tool that is aware of the specific workflow syntax of GitHub Actions workflows. 
+Given a pair of workflow files as input, the tool reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity.
 
 positional arguments:
-  first                 path to first workflow YAML file
-  second                path to second workflow YAML file
+  first                 path to first workflow (YAML) file
+  second                path to second workflow (YAML) file
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -51,8 +49,8 @@ optional arguments:
                         ranged from 0 to 1, weight of job names when comparing
                         jobs (default is 0.2)
   --short, -s           limit the output of values to a few characters
-  --output {text,list,dictionary}
-                        decide on how the output to be shown (default is text)
+  --json                output in json
+                        
 ```
 
 
@@ -74,7 +72,7 @@ The latter accepts two workflows as Python dictionaries (e.g., loaded with `ruam
 
 The `kind` component is one of `added, removed, changed, moved, renamed` and indicates the kind of change.
 `old_path` and `new_path` correspond to a dotted notation indicating where the change occurred, while `old_value` and `new_value` correspond to the previous and new values, respectively.
-Notice that `old_path` and `old_value` are set to `None` in case of an "added" change. Similarly, `new_path` and `old_path` are `None` in case of a "removed" change.
+Notice that `old_path` and `old_value` are set to `None` in case of an "added" change, and `new_path` and `old_path` are `None` in case of a "removed" change.
 
 Similarly to the extra parameters that can be provided to the CLI tool, the `gawd` module exposes `THRESHOLD`, `POSITION_WEIGHT` and `JOB_NAME_WEIGHT`.
 
@@ -109,7 +107,6 @@ You can refer to this library using:
   title = {gawd: GitHub Actions Workflow Differ},
   url = {https://github.com/pooya-rostami/gawd},
   year = {2023},
-  version = {1.0.0},
-  institute = {software engineering lab at university of Mons}
+  institute = {Software Engineering Lab at University of Mons, Belgium}
 }
 ```

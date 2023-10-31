@@ -114,9 +114,8 @@ def distance(v1, v2):
         score = sum(score for _, _, score in matches)
         extra = max(len(v1), len(v2)) - len(matches)
         return (score + extra) / (len(matches) + extra)
-    elif type(v1) == type(v2):
-        if isinstance(v1, str):
-            return 1 - difflib.SequenceMatcher(None, v1, v2).ratio()
+    elif isinstance(v1, str) and isinstance(v2, str):
+        return 1 - difflib.SequenceMatcher(None, v1, v2).ratio()
 
     return 1
 
@@ -151,7 +150,7 @@ def list_changes(lpath, v1, rpath, v2):
     right_matched = set()
     for (i, a), (j, b), score in matches:
         if score > THRESHOLD:
-            break
+            break  # Early out, no more match can be below THRESHOLD
         n_lpath = "{}[{}]".format(lpath, i)
         n_rpath = "{}[{}]".format(rpath, j)
         # Detect moves
@@ -252,14 +251,16 @@ def diff_workflows(w1, w2):
     left_matched = set()
     right_matched = set()
     for (left_name, a), (right_name, b), score in matches:
-        if score <= THRESHOLD:
-            # Did we rename a job?
-            if left_name != right_name:
-                changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
+        if score > THRESHOLD:  # Early out, no more match can be below THRESHOLD
+            break
 
-            changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
-            left_matched.add(left_name)
-            right_matched.add(right_name)
+        # Was the job renamed?
+        if left_name != right_name:
+            changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
+
+        changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
+        left_matched.add(left_name)
+        right_matched.add(right_name)
 
     # Handling of non-matched jobs
     for name, job in jobs1.items():
@@ -285,7 +286,7 @@ def diff_workflow_files(w1, w2):
 
     with open(w1) as f1:
         with open(w2) as f2:
-            parser = yaml.YAML(pure=True)
+            parser = yaml.YAML(typ='safe', pure=True)
             w1 = parser.load(f1)
             w2 = parser.load(f2)
     return diff_workflows(w1, w2)
@@ -298,11 +299,14 @@ def cli():
 
     parser = argparse.ArgumentParser(
         prog="gawd",
-        description="gawd is an open source GitHub Actions Workflow Differencing tool that is aware of the specific workflow syntax. Given a pair of workflow files as input, the tool reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity.",
+        description="""
+            gawd is an open source GitHub Actions Workflow Differencing tool that is aware of the specific workflow syntax of GitHub Actions workflows. 
+            Given a pair of workflow files as input, the tool reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity.
+        """,
     )
 
-    parser.add_argument("first", type=str, help="path to first workflow YAML file")
-    parser.add_argument("second", type=str, help="path to second workflow YAML file")
+    parser.add_argument("first", type=str, help="path to first workflow (YAML) file")
+    parser.add_argument("second", type=str, help="path to second workflow (YAML) file")
     parser.add_argument(
         "--threshold",
         "-t",
@@ -335,18 +339,16 @@ def cli():
         "-s",
         dest="short",
         action='store_true',
-        help=f"limit the output of values to a few characters",
+        help="limit the output of values to a few characters",
     )
     parser.add_argument(
-        "--output",
-        dest="output",
-        choices=['text', 'list', 'dictionary'],
-        action='store',
-        help=f"decide on how the output to be shown (default is text)",
-        default='text'
+        "--json",
+        dest="json",
+        action='store_true',
+        help="output in json",
     )
 
-    args, parameters = parser.parse_known_args()
+    args, _ = parser.parse_known_args()
 
     THRESHOLD = args.THRESHOLD
     POSITION_WEIGHT = args.POSITION_WEIGHT
@@ -357,13 +359,30 @@ def cli():
     # Uncomment these two lines to get a pseudo-sorted list of changes
     # _sort = lambda x: x[1] if x[1] is not None else x[3]
     # differences = sorted(differences, key=_sort)
-
+    
     if args.short:
         _format = lambda o: repr(o)[:20] + ' (...) ' + repr(o)[-10:] if len(repr(o)) >= 30 else repr(o)
     else:
         _format = repr
-
-    if args.output == "text":
+    
+    if args.json:
+        import json
+        
+        output = []
+        for kind, o_path, o_value, n_path, n_value in differences: 
+            output.append({
+                'type': kind, 
+                'old': {
+                    'path': o_path, 
+                    'value': _format(o_value),
+                },
+                'new': {
+                    'path': n_path, 
+                    'value': _format(n_value),
+                }
+            })
+        print(json.dumps(output))
+    else:
         for kind, o_path, o_value, n_path, n_value in differences:
             if kind == "added":
                 print(f"added {n_path} with \"{_format(n_value)}\"")
@@ -377,21 +396,3 @@ def cli():
                 print(f"renamed {o_path} to {n_path}")
             else:
                 raise ValueError(f"Unsupported change `{kind}`, please open an issue")
-    elif args.output == "list":
-        output_list = []
-        for kind, o_path, o_value, n_path, n_value in differences:
-            if kind in ["added", "removed", "changed", "moved", "renamed"]:
-                output_list.append([kind, o_path, o_value, n_path, n_value])
-            else:
-                raise ValueError(f"Unsupported change `{kind}`, please open an issue")
-        print(output_list)
-    elif args.output == "dictionary":
-        import json
-        output_list = []
-        for kind, o_path, o_value, n_path, n_value in differences:
-            if kind in ["added", "removed", "changed", "moved", "renamed"]:
-                dict_output = {"type": kind, "old_path": o_path, "old_value": o_value, "new_path": n_path, "new_value":n_value}
-                output_list.append(dict_output)
-            else:
-                raise ValueError(f"Unsupported change `{kind}`, please open an issue")
-        print(json.dumps(output_list))
