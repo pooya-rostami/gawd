@@ -27,11 +27,14 @@ Otherwise, you can call it using `python -m gawd`.
 
 ```
 usage: gawd [-h] [--threshold X] [--position-weight X] [--job-name-weight X]
-            [--short] [--json]
+            [--short] [--json] [--verbose]
             first second
 
-gawd is an open source GitHub Actions Workflow Differencing tool that is aware of the specific workflow syntax of GitHub Actions workflows. 
-Given a pair of workflow files as input, the tool reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity.
+gawd is an open source GitHub Actions Workflow Differencing tool that is aware
+of the specific workflow syntax of GitHub Actions workflows. Given a pair of
+workflow files as input, the tool reports on the items that were added and
+removed, as well on items that were moved, renamed or changed based on their
+similarity.
 
 positional arguments:
   first                 path to first workflow (YAML) file
@@ -50,7 +53,7 @@ optional arguments:
                         jobs (default is 0.2)
   --short, -s           limit the output of values to a few characters
   --json                output in json
-                        
+  --verbose             output in more detail
 ```
 
 
