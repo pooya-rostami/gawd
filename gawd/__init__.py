@@ -1,6 +1,6 @@
 import difflib
 import itertools
-
+from collections.abc import MutableMapping
 
 __all__ = ["diff_workflows", "diff_workflow_files"]
 
@@ -292,6 +292,43 @@ def diff_workflow_files(w1, w2):
     return diff_workflows(w1, w2)
 
 
+def flatten(dictionary, parent_key='', separator='.'):
+    items = []
+    for key, value in dictionary.items():
+        new_key = parent_key + separator + key if parent_key else key
+        if isinstance(value, MutableMapping):
+            items.extend(flatten(value, new_key, separator=separator).items())
+        elif isinstance(value, list):                 
+            for idx,val in enumerate(value):
+                if type(value[idx]) == dict:
+                    if key != 'steps':
+                        new_key = str(parent_key) + separator + str(key) + separator + str(idx) if parent_key else str(key) + separator + str(idx)
+                    else:
+                        new_key = str(parent_key) + separator + str(key) +'[' + str(idx) + ']' if parent_key else str(key) + separator + str(idx)
+                    items.extend(flatten(value[idx],new_key,separator=separator).items())
+                else:
+                    items.append((new_key, value))
+        else:
+            items.append((new_key, value))
+    return dict(items)
+
+
+def creating_verbose_version(differences):
+    result = []
+    for kind, o_path, o_value, n_path, n_value in differences:
+        if kind == 'added':
+            flatten_dict = flatten(n_value, n_path)
+            for key, value in flatten_dict.items():
+                result.append((kind, o_path, o_value, key, value))
+        elif kind == 'removed':
+            flatten_dict = flatten(o_value, o_path)
+            for key, value in flatten_dict.items():
+                result.append((kind, key, value, n_path, n_value))
+        else:
+            result.append((kind, o_path, o_value, n_path, n_value))
+    return result
+
+
 def cli():
     import argparse
 
@@ -347,6 +384,12 @@ def cli():
         action='store_true',
         help="output in json",
     )
+    parser.add_argument(
+        "--verbose",
+        dest="verbose",
+        action='store_true',
+        help="output in more detail",
+    )
 
     args, _ = parser.parse_known_args()
 
@@ -382,14 +425,29 @@ def cli():
                 }
             })
         print(json.dumps(output))
+    elif args.verbose:
+        differences = creating_verbose_version(differences)
+        for kind, o_path, o_value, n_path, n_value in differences:
+            if kind == "added":
+                print(f"added {n_path} with {_format(n_value)}")
+            elif kind == "removed":
+                print(f"removed {o_path} with {_format(o_value)}")
+            elif kind == "changed":
+                print(f"changed {o_path} from {_format(o_value)} to {_format(n_value)}")
+            elif kind == "moved":
+                print(f"moved {o_path} to {n_path}")
+            elif kind == "renamed":
+                print(f"renamed {o_path} to {n_path}")
+            else:
+                raise ValueError(f"Unsupported change `{kind}`, please open an issue")
     else:
         for kind, o_path, o_value, n_path, n_value in differences:
             if kind == "added":
-                print(f"added {n_path} with \"{_format(n_value)}\"")
+                print(f"added {n_path} with {_format(n_value)}")
             elif kind == "removed":
                 print(f"removed {o_path}")
             elif kind == "changed":
-                print(f"changed {o_path} from \"{_format(o_value)}\" to \"{_format(n_value)}\"")
+                print(f"changed {o_path} from {_format(o_value)} to {_format(n_value)}")
             elif kind == "moved":
                 print(f"moved {o_path} to {n_path}")
             elif kind == "renamed":
