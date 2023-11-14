@@ -1,6 +1,6 @@
 import difflib
 import itertools
-from collections.abc import MutableMapping
+
 
 __all__ = ["diff_workflows", "diff_workflow_files"]
 
@@ -293,14 +293,17 @@ def diff_workflow_files(w1, w2):
 
 
 def flatten(dictionary, parent_key='', separator='.'):
+    """
+    TODO
+    """
     items = []
     for key, value in dictionary.items():
         new_key = parent_key + separator + key if parent_key else key
-        if isinstance(value, MutableMapping):
+        if isinstance(value, dict):
             items.extend(flatten(value, new_key, separator=separator).items())
         elif isinstance(value, list):                 
             for idx,val in enumerate(value):
-                if type(value[idx]) == dict:
+                if isinstance(value[idx], dict):
                     if key != 'steps':
                         new_key = str(parent_key) + separator + str(key) + separator + str(idx) if parent_key else str(key) + separator + str(idx)
                     else:
@@ -314,6 +317,9 @@ def flatten(dictionary, parent_key='', separator='.'):
 
 
 def creating_verbose_version(differences):
+    """
+    TODO
+    """
     result = []
     for kind, o_path, o_value, n_path, n_value in differences:
         if kind == 'added':
@@ -425,22 +431,9 @@ def cli():
                 }
             })
         print(json.dumps(output))
-    elif args.verbose:
-        differences = creating_verbose_version(differences)
-        for kind, o_path, o_value, n_path, n_value in differences:
-            if kind == "added":
-                print(f"added {n_path} with {_format(n_value)}")
-            elif kind == "removed":
-                print(f"removed {o_path} with {_format(o_value)}")
-            elif kind == "changed":
-                print(f"changed {o_path} from {_format(o_value)} to {_format(n_value)}")
-            elif kind == "moved":
-                print(f"moved {o_path} to {n_path}")
-            elif kind == "renamed":
-                print(f"renamed {o_path} to {n_path}")
-            else:
-                raise ValueError(f"Unsupported change `{kind}`, please open an issue")
     else:
+        if args.verbose:
+            differences = creating_verbose_version(differences)
         for kind, o_path, o_value, n_path, n_value in differences:
             if kind == "added":
                 print(f"added {n_path} with {_format(n_value)}")
