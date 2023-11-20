@@ -57,7 +57,10 @@ optional arguments:
 ```
 
 
-The following example shows the output of the command line version of `gawd` when applied to compute the changes made to the workflow file main.yml which can be seen in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db).
+#### Examples:
+Taking changes made to the workflow file "main.yml" in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db) as an example.
+
+`--short` Limited output of `gawd` when applied to compute the changes:
 ```python
 >>> gawd old_main.yaml new_main.yaml --short
 changed jobs.build-linux-clangpdb-gcc5.steps[1].run from "'sudo apt-get update (...) UB_PATH\n'" to "'sudo apt-get update (...) UB_PATH\n'"
@@ -65,6 +68,25 @@ renamed jobs.build-linux-clang38 to jobs.build-linux-clangdwarf
 changed jobs.build-linux-clang38.name from "'Build Linux CLANG38'" to "'Build Linux CLANGDWARF'"
 changed jobs.build-linux-clang38.env.TOOLCHAINS from "'CLANG38'" to "'CLANGDWARF'"
 changed jobs.build-linux-clang38.steps[6].with.name from "'Linux CLANG38 Artifacts'" to "'Linux CLANGDWARF Artifacts'"
+```
+
+`--json` To have the output in the json format:
+```python
+>>> gawd old_main.yaml new_main.yaml --short --json
+[{"type": "changed", "old": {"path": "jobs.build-linux-clangpdb-gcc5.steps[1].run", "value": "'sudo apt-get update (...) UB_PATH\\n'"}, "new": {"path": "jobs.build-linux-clangpdb-gcc5.steps[1].run", "value": "'sudo apt-get update (...) UB_PATH\\n'"}}, 
+{"type": "renamed", "old": {"path": "jobs.build-linux-clang38", "value": "{'name': 'Build Linu (...) *.zip'}}]}"}, "new": {"path": "jobs.build-linux-clangdwarf", "value": "{'name': 'Build Linu (...) *.zip'}}]}"}}, 
+{"type": "changed", "old": {"path": "jobs.build-linux-clang38.name", "value": "'Build Linux CLANG38'"}, "new": {"path": "jobs.build-linux-clangdwarf.name", "value": "'Build Linux CLANGDWARF'"}}, 
+{"type": "changed", "old": {"path": "jobs.build-linux-clang38.env.TOOLCHAINS", "value": "'CLANG38'"}, "new": {"path": "jobs.build-linux-clangdwarf.env.TOOLCHAINS", "value": "'CLANGDWARF'"}}, 
+{"type": "changed", "old": {"path": "jobs.build-linux-clang38.steps[6].with.name", "value": "'Linux CLANG38 Artifacts'"}, "new": {"path": "jobs.build-linux-clangdwarf.steps[6].with.name", "value": "'Linux CLANGDWARF Artifacts'"}}]
+``` 
+
+`--threshold` To change the way of `gawd` making decision on a mapped item being change or addition/removal: 
+```python
+>>> gawd old_main.yaml new_main.yaml --short --threshold 0.1
+removed jobs.build-linux-clangpdb-gcc5.steps[1] with {'name': 'Install De (...) B_PATH\n'}
+added jobs.build-linux-clangpdb-gcc5.steps[1] with {'name': 'Install De (...) B_PATH\n'}
+removed jobs.build-linux-clang38 with {'name': 'Build Linu (...) *.zip'}}]}
+added jobs.build-linux-clangdwarf with {'name': 'Build Linu (...) *.zip'}}]}
 ```
 
 ### As an importable library
