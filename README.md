@@ -58,9 +58,9 @@ optional arguments:
 
 
 #### Examples:
-Taking changes made to the workflow file "main.yml" in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db) as an example.
+Let us take the changes made to the workflow file "main.yml" in [this commit](https://github.com/acidanthera/opencorepkg/commit/459849c8c3c16e74b22e4cdb346e73ce95e0a8db) as an example.
 
-`--short` Limited output of `gawd` when applied to compute the changes:
+`--short` Condensed output of `gawd` when applied to compute the changes:
 ```python
 >>> gawd old_main.yaml new_main.yaml --short
 changed jobs.build-linux-clangpdb-gcc5.steps[1].run from "'sudo apt-get update (...) UB_PATH\n'" to "'sudo apt-get update (...) UB_PATH\n'"
@@ -70,7 +70,7 @@ changed jobs.build-linux-clang38.env.TOOLCHAINS from "'CLANG38'" to "'CLANGDWARF
 changed jobs.build-linux-clang38.steps[6].with.name from "'Linux CLANG38 Artifacts'" to "'Linux CLANGDWARF Artifacts'"
 ```
 
-`--json` To have the output in the json format:
+`--json` To output the results in JSON format:
 ```python
 >>> gawd old_main.yaml new_main.yaml --short --json
 [{"type": "changed", "old": {"path": "jobs.build-linux-clangpdb-gcc5.steps[1].run", "value": "'sudo apt-get update (...) UB_PATH\\n'"}, "new": {"path": "jobs.build-linux-clangpdb-gcc5.steps[1].run", "value": "'sudo apt-get update (...) UB_PATH\\n'"}}, 
@@ -80,7 +80,8 @@ changed jobs.build-linux-clang38.steps[6].with.name from "'Linux CLANG38 Artifac
 {"type": "changed", "old": {"path": "jobs.build-linux-clang38.steps[6].with.name", "value": "'Linux CLANG38 Artifacts'"}, "new": {"path": "jobs.build-linux-clangdwarf.steps[6].with.name", "value": "'Linux CLANGDWARF Artifacts'"}}]
 ``` 
 
-`--threshold` To change the way of `gawd` making decision on a mapped item being change or addition/removal: 
+`--threshold` A value between 0 and 1 representing the sensitivity of `gawd` in identifying changes. A higher threshold results in more instances of 'changed' or 'renamed', while a lower threshold favours 'added' or 'removed':
+
 ```python
 >>> gawd old_main.yaml new_main.yaml --short --threshold 0.1
 removed jobs.build-linux-clangpdb-gcc5.steps[1] with {'name': 'Install De (...) B_PATH\n'}
