@@ -1,7 +1,6 @@
 # gawd - GitHub Actions Workflow Differ
 
 [![Tests](https://github.com/pooya-rostami/gawd/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/pooya-rostami/gawd/actions/workflows/test.yaml)
-[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![PyPI](https://badgen.net/pypi/v/gawd)](https://pypi.org/project/gawd)
 [![Commits](https://badgen.net/github/last-commit/pooya-rostami/gawd)](https://github.com/pooya-rostami/gawd/commits/)
 
@@ -123,16 +122,28 @@ Feel free to report bugs or suggest new features using GitHub issues and/or pull
 
 ## License
 
-Distributed under [GNU Lesser General Public License v3](https://github.com/pooya-rostami/gawd/blob/main/LICENSE.txt).
+This tool is distributed under [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) License
 
-You can refer to this library using:
+## Citing
+
+You can refer to the scientific publication describing this tool using
+```
+@inproceedings{gawd2024MSR,
+  author = {{Rostami Mazrae}, Pooya and Decan, Alexandre and Mens, Tom},
+  title = {gawd: A Differencing Tool for GitHub Actions Workflows},
+  booktitle = {International Conference on Mining Software Repositories - Data and Tools Showcase Track},
+  year = 2024
+}
+```
+
+You can also refer to this tool directly using:
 
 ```
-@software{gawd,
+@software{gawd2023,
   author = {{Rostami Mazrae}, Pooya and Decan, Alexandre},
   title = {gawd: GitHub Actions Workflow Differ},
   url = {https://github.com/pooya-rostami/gawd},
-  year = {2023},
+  year = 2023,
   institute = {Software Engineering Lab at University of Mons, Belgium}
 }
 ```
