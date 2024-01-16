@@ -322,11 +322,11 @@ def creating_verbose_version(differences):
     """
     result = []
     for kind, o_path, o_value, n_path, n_value in differences:
-        if kind == 'added':
+        if kind == 'added' and isinstance(n_value, dict):
             flatten_dict = flatten(n_value, n_path)
             for key, value in flatten_dict.items():
                 result.append((kind, o_path, o_value, key, value))
-        elif kind == 'removed':
+        elif kind == 'removed' and isinstance(o_value, dict):
             flatten_dict = flatten(o_value, o_path)
             for key, value in flatten_dict.items():
                 result.append((kind, key, value, n_path, n_value))
@@ -416,6 +416,9 @@ def cli():
     
     if args.json:
         import json
+        
+        if args.verbose:
+            differences = creating_verbose_version(differences)
         
         output = []
         for kind, o_path, o_value, n_path, n_value in differences: 
