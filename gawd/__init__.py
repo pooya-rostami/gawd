@@ -439,11 +439,11 @@ def cli():
     else:
         _format = repr
 
+    if args.verbose:
+        differences = creating_verbose_version(differences)
+
     if args.json:
         import json
-
-        if args.verbose:
-            differences = creating_verbose_version(differences)
 
         output = []
         for kind, o_path, o_value, n_path, n_value in differences:
@@ -462,8 +462,6 @@ def cli():
             )
         print(json.dumps(output))
     else:
-        if args.verbose:
-            differences = creating_verbose_version(differences)
         for kind, o_path, o_value, n_path, n_value in differences:
             if kind == "added":
                 print(f"added {n_path} with {_format(n_value)}")
