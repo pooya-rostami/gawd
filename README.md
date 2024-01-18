@@ -1,6 +1,7 @@
 # gawd - GitHub Actions Workflow Differ
 
 [![Tests](https://github.com/pooya-rostami/gawd/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/pooya-rostami/gawd/actions/workflows/test.yaml)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![PyPI](https://badgen.net/pypi/v/gawd)](https://pypi.org/project/gawd)
 [![Commits](https://badgen.net/github/last-commit/pooya-rostami/gawd)](https://github.com/pooya-rostami/gawd/commits/)
 
@@ -72,12 +73,12 @@ changed jobs.build-linux-clang38.steps[6].with.name from "'Linux CLANG38 Artifac
 `--json` To output the results in JSON format:
 ```python
 >>> gawd old_main.yaml new_main.yaml --short --json
-[{"type": "changed", "old": {"path": "jobs.build-linux-clangpdb-gcc5.steps[1].run", "value": "'sudo apt-get update (...) UB_PATH\\n'"}, "new": {"path": "jobs.build-linux-clangpdb-gcc5.steps[1].run", "value": "'sudo apt-get update (...) UB_PATH\\n'"}}, 
-{"type": "renamed", "old": {"path": "jobs.build-linux-clang38", "value": "{'name': 'Build Linu (...) *.zip'}}]}"}, "new": {"path": "jobs.build-linux-clangdwarf", "value": "{'name': 'Build Linu (...) *.zip'}}]}"}}, 
-{"type": "changed", "old": {"path": "jobs.build-linux-clang38.name", "value": "'Build Linux CLANG38'"}, "new": {"path": "jobs.build-linux-clangdwarf.name", "value": "'Build Linux CLANGDWARF'"}}, 
-{"type": "changed", "old": {"path": "jobs.build-linux-clang38.env.TOOLCHAINS", "value": "'CLANG38'"}, "new": {"path": "jobs.build-linux-clangdwarf.env.TOOLCHAINS", "value": "'CLANGDWARF'"}}, 
+[{"type": "changed", "old": {"path": "jobs.build-linux-clangpdb-gcc5.steps[1].run", "value": "'sudo apt-get update (...) UB_PATH\\n'"}, "new": {"path": "jobs.build-linux-clangpdb-gcc5.steps[1].run", "value": "'sudo apt-get update (...) UB_PATH\\n'"}},
+{"type": "renamed", "old": {"path": "jobs.build-linux-clang38", "value": "{'name': 'Build Linu (...) *.zip'}}]}"}, "new": {"path": "jobs.build-linux-clangdwarf", "value": "{'name': 'Build Linu (...) *.zip'}}]}"}},
+{"type": "changed", "old": {"path": "jobs.build-linux-clang38.name", "value": "'Build Linux CLANG38'"}, "new": {"path": "jobs.build-linux-clangdwarf.name", "value": "'Build Linux CLANGDWARF'"}},
+{"type": "changed", "old": {"path": "jobs.build-linux-clang38.env.TOOLCHAINS", "value": "'CLANG38'"}, "new": {"path": "jobs.build-linux-clangdwarf.env.TOOLCHAINS", "value": "'CLANGDWARF'"}},
 {"type": "changed", "old": {"path": "jobs.build-linux-clang38.steps[6].with.name", "value": "'Linux CLANG38 Artifacts'"}, "new": {"path": "jobs.build-linux-clangdwarf.steps[6].with.name", "value": "'Linux CLANGDWARF Artifacts'"}}]
-``` 
+```
 
 `--threshold` A value between 0 and 1 representing the sensitivity of `gawd` in identifying changes. A higher threshold results in more instances of 'changed' or 'renamed', while a lower threshold favours 'added' or 'removed':
 
@@ -122,7 +123,8 @@ Feel free to report bugs or suggest new features using GitHub issues and/or pull
 
 ## License
 
-This tool is distributed under [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) License
+This tool is distributed under [GNU Lesser General Public License v3](https://github.com/pooya-rostami/gawd/blob/main/LICENSE.txt).
+
 
 ## Citing
 
