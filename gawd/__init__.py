@@ -63,7 +63,9 @@ def find_job_matches(j1, j2):
     # List all combinations and compute their distance scores
     for (i, a), (j, b) in itertools.product(j1.items(), j2.items()):
         # Compute a score including a penalty if positions differ
-        score = (1 - JOB_NAME_WEIGHT) * distance(a, b) + JOB_NAME_WEIGHT * distance(i, j)
+        score = (1 - JOB_NAME_WEIGHT) * distance(a, b) + JOB_NAME_WEIGHT * distance(
+            i, j
+        )
         candidates.append(((i, a), (j, b), score))
 
     # Find best matches
@@ -286,13 +288,13 @@ def diff_workflow_files(w1, w2):
 
     with open(w1) as f1:
         with open(w2) as f2:
-            parser = yaml.YAML(typ='safe', pure=True)
+            parser = yaml.YAML(typ="safe", pure=True)
             w1 = parser.load(f1)
             w2 = parser.load(f2)
     return diff_workflows(w1, w2)
 
 
-def flatten(dictionary, parent_key='', separator='.'):
+def flatten(dictionary, parent_key="", separator="."):
     """
     TODO
     """
@@ -301,14 +303,33 @@ def flatten(dictionary, parent_key='', separator='.'):
         new_key = parent_key + separator + key if parent_key else key
         if isinstance(value, dict):
             items.extend(flatten(value, new_key, separator=separator).items())
-        elif isinstance(value, list):                 
-            for idx,val in enumerate(value):
+        elif isinstance(value, list):
+            for idx, val in enumerate(value):
                 if isinstance(value[idx], dict):
-                    if key != 'steps':
-                        new_key = str(parent_key) + separator + str(key) + separator + str(idx) if parent_key else str(key) + separator + str(idx)
+                    if key != "steps":
+                        new_key = (
+                            str(parent_key)
+                            + separator
+                            + str(key)
+                            + separator
+                            + str(idx)
+                            if parent_key
+                            else str(key) + separator + str(idx)
+                        )
                     else:
-                        new_key = str(parent_key) + separator + str(key) +'[' + str(idx) + ']' if parent_key else str(key) + separator + str(idx)
-                    items.extend(flatten(value[idx],new_key,separator=separator).items())
+                        new_key = (
+                            str(parent_key)
+                            + separator
+                            + str(key)
+                            + "["
+                            + str(idx)
+                            + "]"
+                            if parent_key
+                            else str(key) + separator + str(idx)
+                        )
+                    items.extend(
+                        flatten(value[idx], new_key, separator=separator).items()
+                    )
                 else:
                     items.append((new_key, value))
         else:
@@ -322,11 +343,11 @@ def creating_verbose_version(differences):
     """
     result = []
     for kind, o_path, o_value, n_path, n_value in differences:
-        if kind == 'added' and isinstance(n_value, dict):
+        if kind == "added" and isinstance(n_value, dict):
             flatten_dict = flatten(n_value, n_path)
             for key, value in flatten_dict.items():
                 result.append((kind, o_path, o_value, key, value))
-        elif kind == 'removed' and isinstance(o_value, dict):
+        elif kind == "removed" and isinstance(o_value, dict):
             flatten_dict = flatten(o_value, o_path)
             for key, value in flatten_dict.items():
                 result.append((kind, key, value, n_path, n_value))
@@ -343,7 +364,7 @@ def cli():
     parser = argparse.ArgumentParser(
         prog="gawd",
         description="""
-            gawd is an open source GitHub Actions Workflow Differencing tool that is aware of the specific workflow syntax of GitHub Actions workflows. 
+            gawd is an open source GitHub Actions Workflow Differencing tool that is aware of the specific workflow syntax of GitHub Actions workflows.
             Given a pair of workflow files as input, the tool reports on the items that were added and removed, as well on items that were moved, renamed or changed based on their similarity.
         """,
     )
@@ -381,19 +402,19 @@ def cli():
         "--short",
         "-s",
         dest="short",
-        action='store_true',
+        action="store_true",
         help="limit the output of values to a few characters",
     )
     parser.add_argument(
         "--json",
         dest="json",
-        action='store_true',
+        action="store_true",
         help="output in json",
     )
     parser.add_argument(
         "--verbose",
         dest="verbose",
-        action='store_true',
+        action="store_true",
         help="output in more detail",
     )
 
@@ -408,31 +429,37 @@ def cli():
     # Uncomment these two lines to get a pseudo-sorted list of changes
     # _sort = lambda x: x[1] if x[1] is not None else x[3]
     # differences = sorted(differences, key=_sort)
-    
+
     if args.short:
-        _format = lambda o: repr(o)[:20] + ' (...) ' + repr(o)[-10:] if len(repr(o)) >= 30 else repr(o)
+        _format = (
+            lambda o: repr(o)[:20] + " (...) " + repr(o)[-10:]
+            if len(repr(o)) >= 30
+            else repr(o)
+        )
     else:
         _format = repr
-    
+
     if args.json:
         import json
-        
+
         if args.verbose:
             differences = creating_verbose_version(differences)
-        
+
         output = []
-        for kind, o_path, o_value, n_path, n_value in differences: 
-            output.append({
-                'type': kind, 
-                'old': {
-                    'path': o_path, 
-                    'value': _format(o_value),
-                },
-                'new': {
-                    'path': n_path, 
-                    'value': _format(n_value),
+        for kind, o_path, o_value, n_path, n_value in differences:
+            output.append(
+                {
+                    "type": kind,
+                    "old": {
+                        "path": o_path,
+                        "value": _format(o_value),
+                    },
+                    "new": {
+                        "path": n_path,
+                        "value": _format(n_value),
+                    },
                 }
-            })
+            )
         print(json.dumps(output))
     else:
         if args.verbose:
