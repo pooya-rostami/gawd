@@ -208,76 +208,69 @@ def diff_workflows(w1, w2):
     """
     changes = []
 
-    if w1 is None and w2 is not None:
-        for key in w2:
-            changes.append(("added", None, None, key, w2[key]))
-    elif w1 is not None and w2 is None:
-        for key in w1:
-            changes.append(("removed", key, w1[key], None, None))
-    elif w1 is not None and w2 is not None: 
-        # Compare workflows except their "on" and "jobs" keys (specific treatment for them)
-        for key in w1:
-            if key not in ["on", "jobs"]:
-                if key not in w2:
-                    changes.append(("removed", key, w1[key], None, None))
-                else:
-                    changes.extend(find_changes(key, w1[key], key, w2[key]))
-        for key in w2:
-            if key not in ["on", "jobs"]:
-                if key not in w1:
-                    changes.append(("added", None, None, key, w2[key]))
-
-        # Specific handling of "on" when it's a list or str and not a dict
-        if "on" in w1:
-            if "on" not in w2:
-                changes.append(("removed", "on", w1["on"], None, None))
+    # Compare workflows except their "on" and "jobs" keys (specific treatment for them)
+    for key in w1:
+        if key not in ["on", "jobs"]:
+            if key not in w2:
+                changes.append(("removed", key, w1[key], None, None))
             else:
-                w1_on = w1["on"]
-                w2_on = w2["on"]
+                changes.extend(find_changes(key, w1[key], key, w2[key]))
+    for key in w2:
+        if key not in ["on", "jobs"]:
+            if key not in w1:
+                changes.append(("added", None, None, key, w2[key]))
 
-                # Convert w1['on'] to dict
-                if not isinstance(w1_on, dict):
-                    if not isinstance(w1_on, list):
-                        w1_on = [w1_on]
-                    w1_on = {k: None for k in w1_on}
+    # Specific handling of "on" when it's a list or str and not a dict
+    if "on" in w1:
+        if "on" not in w2:
+            changes.append(("removed", "on", w1["on"], None, None))
+        else:
+            w1_on = w1["on"]
+            w2_on = w2["on"]
 
-                # Convert w2['on'] to dict
-                if not isinstance(w2_on, dict):
-                    if not isinstance(w2_on, list):
-                        w2_on = [w2_on]
-                    w2_on = {k: None for k in w2_on}
+            # Convert w1['on'] to dict
+            if not isinstance(w1_on, dict):
+                if not isinstance(w1_on, list):
+                    w1_on = [w1_on]
+                w1_on = {k: None for k in w1_on}
 
-                changes.extend(find_changes("on", w1_on, "on", w2_on))
-        elif "on" in w2:
-            changes.append(("added", None, None, "on", w2["on"]))
+            # Convert w2['on'] to dict
+            if not isinstance(w2_on, dict):
+                if not isinstance(w2_on, list):
+                    w2_on = [w2_on]
+                w2_on = {k: None for k in w2_on}
 
-        # Specific handling of jobs
-        jobs1 = w1.get("jobs", {})
-        jobs2 = w2.get("jobs", {})
-        matches = find_job_matches(jobs1, jobs2)
+            changes.extend(find_changes("on", w1_on, "on", w2_on))
+    elif "on" in w2:
+        changes.append(("added", None, None, "on", w2["on"]))
 
-        # Detect renamings and changes
-        left_matched = set()
-        right_matched = set()
-        for (left_name, a), (right_name, b), score in matches:
-            if score > THRESHOLD:  # Early out, no more match can be below THRESHOLD
-                break
+    # Specific handling of jobs
+    jobs1 = w1.get("jobs", {})
+    jobs2 = w2.get("jobs", {})
+    matches = find_job_matches(jobs1, jobs2)
 
-            # Was the job renamed?
-            if left_name != right_name:
-                changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
+    # Detect renamings and changes
+    left_matched = set()
+    right_matched = set()
+    for (left_name, a), (right_name, b), score in matches:
+        if score > THRESHOLD:  # Early out, no more match can be below THRESHOLD
+            break
 
-            changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
-            left_matched.add(left_name)
-            right_matched.add(right_name)
+        # Was the job renamed?
+        if left_name != right_name:
+            changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
 
-        # Handling of non-matched jobs
-        for name, job in jobs1.items():
-            if name not in left_matched:
-                changes.append(("removed", "jobs." + name, job, None, None))
-        for name, job in jobs2.items():
-            if name not in right_matched:
-                changes.append(("added", None, None, "jobs." + name, job))
+        changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
+        left_matched.add(left_name)
+        right_matched.add(right_name)
+
+    # Handling of non-matched jobs
+    for name, job in jobs1.items():
+        if name not in left_matched:
+            changes.append(("removed", "jobs." + name, job, None, None))
+    for name, job in jobs2.items():
+        if name not in right_matched:
+            changes.append(("added", None, None, "jobs." + name, job))
 
     return changes
 
