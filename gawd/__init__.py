@@ -291,6 +291,10 @@ def diff_workflow_files(w1, w2):
             parser = yaml.YAML(typ="safe", pure=True)
             w1 = parser.load(f1)
             w2 = parser.load(f2)
+
+    w1 = dict() if w1 is None else w1
+    w2 = dict() if w2 is None else w2
+
     return diff_workflows(w1, w2)
 
 
