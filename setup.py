@@ -9,7 +9,7 @@ with open(
 
 setup(
     name="gawd",
-    version="1.1.0",
+    version="1.1.1",
     license="LGPLv3",
     author="Pooya Rostami Mazrae, Alexandre Decan",
     url="https://github.com/pooya-rostami/gawd",
