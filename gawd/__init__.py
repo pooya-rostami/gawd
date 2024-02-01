@@ -130,13 +130,13 @@ def dict_changes(lpath, v1, rpath, v2):
 
     changes = []
     for k in removed:
-        changes.append(("removed", "{}.{}".format(lpath, k), v1[k], None, None))
+        changes.append(("removed", lpath + [str(k)], v1[k], None, None))
     for k in added:
-        changes.append(("added", None, None, "{}.{}".format(rpath, k), v2[k]))
+        changes.append(("added", None, None, rpath + [str(k)], v2[k]))
     for k in common:
         changes.extend(
             find_changes(
-                "{}.{}".format(lpath, k), v1[k], "{}.{}".format(rpath, k), v2[k]
+                lpath + [str(k)], v1[k], rpath + [str(k)], v2[k]
             )
         )
 
@@ -153,8 +153,8 @@ def list_changes(lpath, v1, rpath, v2):
     for (i, a), (j, b), score in matches:
         if score > THRESHOLD:
             break  # Early out, no more match can be below THRESHOLD
-        n_lpath = "{}[{}]".format(lpath, i)
-        n_rpath = "{}[{}]".format(rpath, j)
+        n_lpath = lpath + [i]
+        n_rpath = rpath + [j]
         # Detect moves
         if i != j:
             changes.append(("moved", n_lpath, a, n_rpath, b))
@@ -166,10 +166,10 @@ def list_changes(lpath, v1, rpath, v2):
     # Deal with added and removed items
     for i, a in enumerate(v1):
         if i not in left_matched:
-            changes.append(("removed", "{}[{}]".format(lpath, i), a, None, None))
+            changes.append(("removed", lpath + [i], a, None, None))
     for j, b in enumerate(v2):
         if j not in right_matched:
-            changes.append(("added", None, None, "{}[{}]".format(rpath, j), b))
+            changes.append(("added", None, None, rpath + [j], b))
 
     return changes
 
@@ -204,7 +204,8 @@ def diff_workflows(w1, w2):
     dictionaries (e.g., loaded using ruamel.yaml).
 
     The list of differences is provided as a list of 5-uples of the form:
-    (kind, old_path, old_value, new_path, new_value).
+    (kind, old_path, old_value, new_path, new_value) where both old_path and 
+    new_path are a list of path components (str for dict keys, int for sequence indexes).
     """
     changes = []
 
@@ -212,18 +213,18 @@ def diff_workflows(w1, w2):
     for key in w1:
         if key not in ["on", "jobs"]:
             if key not in w2:
-                changes.append(("removed", key, w1[key], None, None))
+                changes.append(("removed", [str(key)], w1[key], None, None))
             else:
-                changes.extend(find_changes(key, w1[key], key, w2[key]))
+                changes.extend(find_changes([str(key)], w1[key], [str(key)], w2[key]))
     for key in w2:
         if key not in ["on", "jobs"]:
             if key not in w1:
-                changes.append(("added", None, None, key, w2[key]))
+                changes.append(("added", None, None, [str(key)], w2[key]))
 
     # Specific handling of "on" when it's a list or str and not a dict
     if "on" in w1:
         if "on" not in w2:
-            changes.append(("removed", "on", w1["on"], None, None))
+            changes.append(("removed", ["on"], w1["on"], None, None))
         else:
             w1_on = w1["on"]
             w2_on = w2["on"]
@@ -240,9 +241,9 @@ def diff_workflows(w1, w2):
                     w2_on = [w2_on]
                 w2_on = {k: None for k in w2_on}
 
-            changes.extend(find_changes("on", w1_on, "on", w2_on))
+            changes.extend(find_changes(["on"], w1_on, ["on"], w2_on))
     elif "on" in w2:
-        changes.append(("added", None, None, "on", w2["on"]))
+        changes.append(("added", None, None, ["on"], w2["on"]))
 
     # Specific handling of jobs
     jobs1 = w1.get("jobs", {})
@@ -258,19 +259,19 @@ def diff_workflows(w1, w2):
 
         # Was the job renamed?
         if left_name != right_name:
-            changes.append(("renamed", "jobs." + left_name, a, "jobs." + right_name, b))
+            changes.append(("renamed", ["jobs", str(left_name)], a, ["jobs", str(right_name)], b))
 
-        changes.extend(find_changes("jobs." + left_name, a, "jobs." + right_name, b))
+        changes.extend(find_changes(["jobs", str(left_name)], a, ["jobs", str(right_name)], b))
         left_matched.add(left_name)
         right_matched.add(right_name)
 
     # Handling of non-matched jobs
     for name, job in jobs1.items():
         if name not in left_matched:
-            changes.append(("removed", "jobs." + name, job, None, None))
+            changes.append(("removed", ["jobs", str(name)], job, None, None))
     for name, job in jobs2.items():
         if name not in right_matched:
-            changes.append(("added", None, None, "jobs." + name, job))
+            changes.append(("added", None, None, ["jobs", str(name)], job))
 
     return changes
 
@@ -282,7 +283,8 @@ def diff_workflow_files(w1, w2):
     to the new workflow file.
 
     The returned list of differences contains 5-uples of the form:
-    (kind, old_path, old_value, new_path, new_value).
+    (kind, old_path, old_value, new_path, new_value) where both old_path and 
+    new_path are a list of path components (str for dict keys, int for sequence indexes).
     """
     import ruamel.yaml as yaml
 
@@ -296,6 +298,27 @@ def diff_workflow_files(w1, w2):
     w2 = dict() if w2 is None else w2
 
     return diff_workflows(w1, w2)
+
+
+def path_to_string(components):
+    """ 
+    Convert a list of path components to a string.
+
+    TODO: Enable customisation of the string representation
+    """
+    if components is None: 
+        return None
+    
+    output = []
+    for i, component in enumerate(components):
+        if isinstance(component, int):  # Sequence index
+            component = "[{}]".format(component)
+        elif isinstance(component, str):  # Dict key
+            if i > 0:  # All except first
+                component = ".{}".format(component)
+
+        output.append(component)
+    return ''.join(output)
 
 
 def flatten(dictionary, parent_key="", separator="."):
@@ -428,7 +451,16 @@ def cli():
     POSITION_WEIGHT = args.POSITION_WEIGHT
     JOB_NAME_WEIGHT = args.JOB_NAME_WEIGHT
 
-    differences = diff_workflow_files(args.first, args.second)
+    # Compute differences and convert path components to a string
+    differences = []
+    for kind, o_path, o_value, n_path, n_value in diff_workflow_files(args.first, args.second):
+        differences.append((
+            kind, 
+            path_to_string(o_path),
+            o_value,
+            path_to_string(n_path), 
+            n_value,
+        ))
 
     # Uncomment these two lines to get a pseudo-sorted list of changes
     # _sort = lambda x: x[1] if x[1] is not None else x[3]

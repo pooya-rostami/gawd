@@ -9,7 +9,15 @@ def compare_results(first, second):
     
     Not really efficient, but we cannot easily do better, since arbitrary dicts 
     are not hashable nor sortable. 
+
+    Also convert paths from first list to strings.
     """
+    # Convert path components to string
+    first = [
+        (k, gawd.path_to_string(op), ov, gawd.path_to_string(np), nv)
+        for k, op, ov, np, nv in first
+    ]
+
     for e in first: 
         assert e in second
     for e in second:
