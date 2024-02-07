@@ -109,11 +109,11 @@ The following example shows the output of the imported library version of `gawd`
 >>> old_workflow_path = ...
 >>> new_workflow_path = ...
 >>> diff_workflow_files(old_workflow_path, new_workflow_path)
-[('changed', 'jobs.build-linux-clangpdb-gcc5.steps[1].run', 'sudo apt-get update\nsudo apt-get install nasm ...', 'jobs.build-linux-clangpdb-gcc5.steps[1].run', 'sudo apt-get update\nsudo apt-get install nasm ...'),
-('renamed', 'jobs.build-linux-clang38', {'name': 'Build Linux CLANG38', ...}, 'jobs.build-linux-clangdwarf', {'name': 'Build Linux CLANGDWARF', ...}),
-('changed', 'jobs.build-linux-clang38.name', 'Build Linux CLANG38', 'jobs.build-linux-clangdwarf.name', 'Build Linux CLANGDWARF'),
-('changed', 'jobs.build-linux-clang38.env.TOOLCHAINS', 'CLANG38', 'jobs.build-linux-clangdwarf.env.TOOLCHAINS', 'CLANGDWARF'),
-('changed', 'jobs.build-linux-clang38.steps[6].with.name', 'Linux CLANG38 Artifacts', 'jobs.build-linux-clangdwarf.steps[6].with.name', 'Linux CLANGDWARF Artifacts')]
+[('changed', ['jobs', 'build-linux-clangpdb-gcc5', 'steps', 1, 'run'], 'sudo apt-get update\nsudo apt-get install nasm ...', ['jobs', 'build-linux-clangpdb-gcc5', 'steps', 1, 'run'], 'sudo apt-get update\nsudo apt-get install nasm ...'),
+('renamed', ['jobs', 'build-linux-clang38'], {'name': 'Build Linux CLANG38', ...}, ['jobs', 'build-linux-clangdwarf'], {'name': 'Build Linux CLANGDWARF', ...}), 
+('changed', ['jobs', 'build-linux-clang38', 'name'], 'Build Linux CLANG38', ['jobs', 'build-linux-clangdwarf', 'name'], 'Build Linux CLANGDWARF'), 
+('changed', ['jobs', 'build-linux-clang38', 'env', 'TOOLCHAINS'], 'CLANG38', ['jobs', 'build-linux-clangdwarf', 'env', 'TOOLCHAINS'], 'CLANGDWARF'), 
+('changed', ['jobs', 'build-linux-clang38', 'steps', 6, 'with', 'name'], 'Linux CLANG38 Artifacts', ['jobs', 'build-linux-clangdwarf', 'steps', 6, 'with', 'name'], 'Linux CLANGDWARF Artifacts')]
 ```
 
 ## Contributions
