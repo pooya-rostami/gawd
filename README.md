@@ -97,7 +97,7 @@ The former accepts the paths to two workflow files, loads them and returns the o
 The latter accepts two workflows as Python dictionaries (e.g., loaded with `ruamel.yaml`) and returns a list of 5-tuples `(kind, old_path, old_value, new_path, new_value)`.
 
 The `kind` component is one of `added, removed, changed, moved, renamed` and indicates the kind of change.
-`old_path` and `new_path` correspond to a dotted notation indicating where the change occurred, while `old_value` and `new_value` correspond to the previous and new values, respectively.
+`old_path` and `new_path` correspond to a list notation indicating where the change occurred with numbers being indicators of mapped place in sequential structures, while `old_value` and `new_value` correspond to the previous and new values, respectively.
 Notice that `old_path` and `old_value` are set to `None` in case of an "added" change, and `new_path` and `old_path` are `None` in case of a "removed" change.
 
 Similarly to the extra parameters that can be provided to the CLI tool, the `gawd` module exposes `THRESHOLD`, `POSITION_WEIGHT` and `JOB_NAME_WEIGHT`.
