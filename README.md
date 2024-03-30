@@ -18,9 +18,7 @@ You can use `pip install gawd` to install the latest available version from [PyP
 Pre-releases are available from the *main* branch on [GitHub](https://github.com/pooya-rostami/gawd)
 and can be installed with `pip install git+https://github.com/pooya-rostami/gawd`.
 
-Alternatively, `gawd` supports installation via Nix. To install `gawd` using Nix:
-- For a temporary environment, execute `nix-shell -p gawd`, which provides a shell with `gawd` available.
-- To leverage Nix flakes, a more modern approach, use `nix shell github:NixOS/nixpkgs#gawd` to enter an ephemeral shell environment or `nix run github:NixOS/nixpkgs#gawd` for running `gawd` directly without entering a shell.
+Alternatively, `gawd` is available via [Nix](https://search.nixos.org/packages?channel=unstable&show=gawd&from=0&size=50&sort=relevance&type=packages&query=gawd).
 
 ## Usage
 
