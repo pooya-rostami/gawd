@@ -18,6 +18,8 @@ You can use `pip install gawd` to install the latest available version from [PyP
 Pre-releases are available from the *main* branch on [GitHub](https://github.com/pooya-rostami/gawd)
 and can be installed with `pip install git+https://github.com/pooya-rostami/gawd`.
 
+Alternatively, `gawd` is available via [Nix](https://search.nixos.org/packages?channel=unstable&show=gawd&from=0&size=50&sort=relevance&type=packages&query=gawd).
+
 ## Usage
 
 ### As a command-line tool
