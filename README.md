@@ -4,6 +4,7 @@
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![PyPI](https://badgen.net/pypi/v/gawd)](https://pypi.org/project/gawd)
 [![Commits](https://badgen.net/github/last-commit/pooya-rostami/gawd)](https://github.com/pooya-rostami/gawd/commits/)
+[![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/pooya-rostami/gawd/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/pooya-rostami/gawd)
 
 `gawd` stands for **G**itHub **A**ctions **W**orkflow **D**iffer.
 It is a Python library and command-line tool that computes all changes (i.e., diffs) between two GitHub Actions workflow files.
